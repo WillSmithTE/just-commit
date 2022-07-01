@@ -1,101 +1,198 @@
 import * as React from 'react';
-import { Text, View, StyleSheet, Button, TouchableOpacity } from 'react-native';
-import { Audio } from 'expo-av';
+import { Text, View, StyleSheet, Button, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { Audio, AVPlaybackStatus, Video } from 'expo-av';
 import Icon from './Icon';
 import { formatTime, useTimer } from './useTimer'
 import Toast from 'react-native-root-toast';
 import { useDispatch } from 'react-redux';
 import { addSong } from '../services/songSlice';
 import { api } from '../services/api';
+import { useEffect, useState } from 'react';
+import { Camera, CameraType } from 'expo-camera';
+import { RootTabScreenProps } from '../types';
 
-export const Recorder = () => {
-    const [recording, setRecording] = React.useState<Audio.Recording | undefined>();
-    const [stopwatchReset, setReset] = React.useState(false)
+export const Recorder = ({ navigation }: RootTabScreenProps<'Home'>) => {
+    const [recordingUri, setRecordingUri] = useState<string | undefined>();
+    const [stopwatchReset, setReset] = useState(false)
+    const [isRecording, setIsRecording] = useState(false)
+    const [hasPermission, setHasPermission] = useState(false);
+    const [type, setType] = useState(CameraType.back);
+    const [camera, setCamera] = useState<Camera | undefined>();
 
     const dispatch = useDispatch()
-    const { timer, isActive, isPaused, handleStart, handlePause, handleResume, handleReset } = useTimer(0)
 
-    async function startRecording() {
-        const start = performance.now()
-        try {
-            console.log(`t1 ${performance.now() - start}`)
-            console.log('Requesting permissions..');
-            await Audio.requestPermissionsAsync();
-            console.log(`t2 ${performance.now() - start}`)
+    useEffect(() => {
+        (async () => {
+            const { status: cameraStatus } = await Camera.requestCameraPermissionsAsync();
+            const { status: audioStatus } = await Camera.requestMicrophonePermissionsAsync();
 
-            await Audio.setAudioModeAsync({
-                allowsRecordingIOS: true,
-                playsInSilentModeIOS: true,
-            });
-            console.log(`t3 ${performance.now() - start}`)
+            setHasPermission(cameraStatus === 'granted' && audioStatus === 'granted');
+        })();
+    }, []);
 
-            console.log('Starting recording..');
-            handleStart()
-            console.log(`t4 ${performance.now() - start}`)
-
-            const {recording} = await Audio.Recording.createAsync(Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY)
-            setRecording(recording)
-
-            console.log(`t5 ${performance.now() - start}`)
-
-            console.log('Recording started');
-            console.log(`t6 ${performance.now() - start}`)
-
-        } catch (err) {
-            console.error('Failed to start recording', err);
-        }
+    const startRecording = async () => {
+        setIsRecording(true)
+        const newUri = (await camera!!.recordAsync()).uri
+        console.log(newUri);
+        setRecordingUri(newUri);
     }
 
-    async function stopRecording() {
-        console.log('Stopping recording..');
-        handleReset()
-        setRecording(undefined);
-        await recording!!.stopAndUnloadAsync();
-        const uri = recording!!.getURI();
-        showSuccessfulRecording(`Recording saved`)
-        console.log(`Recording stopped (uri=${uri}, time=${timer})`);
-        setRecording(undefined)
-        const saved = await api.saveSong({uri: uri!!, durationSeconds: timer})
-        dispatch(addSong(saved))
+    const stopRecording = async () => {
+        camera!!.stopRecording();
+        setIsRecording(false)
     }
 
-    return (
-        <View style={styles.container}>
-            {/* <Stopwatch start={!!recording} reset={stopwatchReset} options={stopwatchStyle} getMsecs={stopwatchGetTime} /> */}
-            <View><Text style={stopwatchStyle.text}>{formatTime(timer)}</Text></View>
-            <TouchableOpacity onPress={isActive ? stopRecording : startRecording}>
-                {isActive ? <StopIcon /> : <StartIcon />}
-            </TouchableOpacity>
-        </View>
+    if (hasPermission === null) {
+        console.warn(`no permissions for camera recording`)
+        return <View />;
+    }
+
+    return (!!recordingUri ?
+        <VideoPlayback uri={recordingUri} /> :
+        <Camera style={styles.camera} type={type} ref={ref => setCamera(ref!!)}>
+            <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                    style={styles.closeButton}
+                    onPress={() => navigation.goBack()}>
+                    <Icon family='AntDesign' name='close' color='white' props={{ size: 35 }} />
+                </TouchableOpacity>
+            </View>
+            <View style={styles.bottomRow}>
+                <View style={styles.buttonContainer}>
+                    <TouchableOpacity
+                        style={styles.invisibleButton}>
+                        <Icon family='MaterialIcons' name='restore-from-trash' color='black' props={{ size: 35 }} />
+                    </TouchableOpacity>
+                </View>
+                <View style={styles.buttonContainer}>
+                    <TouchableOpacity
+                        style={styles.recordButton}
+                        onPress={isRecording ? stopRecording : startRecording}>
+                        {isRecording ? <StopRecordingIcon /> : <StartRecordingIcon />}
+                    </TouchableOpacity>
+                </View>
+                <View style={styles.buttonContainer}>
+                    <TouchableOpacity
+                        style={Object.assign({}, styles.flipButton, isRecording ? styles.invisibleButton : {})}
+                        onPress={() => {
+                            setType(type === CameraType.back ? CameraType.front : CameraType.back);
+                        }}>
+                        <Icon family='MaterialIcons' name='flip-camera-ios' color='white' props={{ size: 35 }} />
+                    </TouchableOpacity>
+                </View>
+
+            </View>
+        </Camera>
     );
 }
 
-const StartIcon = () => <Icon family='MaterialCommunityIcons' name='record-circle' color='red' props={{ size: 150 }} />
+const StartRecordingIcon = () => <Icon family='MaterialCommunityIcons' name='record-circle' color='red' props={{ size: 150 }} />
 
-const StopIcon = () => <Icon family='MaterialCommunityIcons' name='stop-circle' color='red' props={{ size: 150 }} />
+const StopRecordingIcon = () => <Icon family='MaterialCommunityIcons' name='stop-circle' color='red' props={{ size: 150 }} />
 
-const showSuccessfulRecording = (message: string) => {
-    Toast.show(message, {
-        duration: Toast.durations.LONG,
-        textColor: 'white',
-        backgroundColor: 'green'
-    });
-}
-const stopwatchStyle = {
-    container: {
-        backgroundColor: '#000',
-        paddingBottom: 80,
-    },
-    text: {
-        fontSize: 60,
-        color: 'white',
+const VideoPlayback = ({ uri }: { uri: string }) => {
+    const video = React.useRef<Video>(null);
+    const [status, setStatus] = useState<AVPlaybackStatus | undefined>();
+
+    const pressDelete = () => {
+        console.log('deleting..')
     }
-};
+
+    const pressTick = () => {
+        console.log('saving..')
+    }
+
+    return <>
+        <Video
+            ref={video}
+            style={styles.video}
+            source={{ uri, }}
+            useNativeControls
+            resizeMode="contain"
+            isLooping={false}
+            onPlaybackStatusUpdate={newStatus => setStatus(() => newStatus)}
+        />
+        {
+            status?.isLoaded ?
+                <>
+                    <View style={styles.bottomRow}>
+                        <TouchableOpacity onPress={pressDelete} style={styles.deleteButton}>
+                            <Icon family='Entypo' name='trash' color='white' size={35} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() =>
+                            status?.isPlaying ?
+                                video.current!!.pauseAsync().catch(console.error)
+                                : video.current!!.playAsync().catch(console.error)
+                        }>
+                            {status.isPlaying ?
+                                <Icon family='Ionicons' name='stop-circle' color='red' size={60} /> :
+                                <Icon family='Ionicons' name='play-circle' color='red' size={60} />
+                            }
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={pressTick} style={styles.tickButton}>
+                            <Icon family='Entypo' name='check' color='white' size={35} />
+                        </TouchableOpacity>
+                    </View>
+                </> :
+                <Loading />
+        }
+    </>
+}
+
+const Loading = () => <View>
+    <ActivityIndicator />
+</View>
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
+    },
+    camera: {
+        flex: 1,
+    },
+    buttonContainer: {
+        backgroundColor: 'transparent',
+        margin: 20,
+    },
+    closeButton: {
+        marginBottom: 'auto',
+        marginRight: 'auto',
+    },
+    invisibleButton: {
+        opacity: 0,
+        height: 0,
+    },
+    recordButton: {
+        // marginLeft: 'auto',
+        // marginTop: 'auto'
+    },
+    flipButton: {
+        // marginLeft: 'auto',
+        marginRight: 12,
+        marginBottom: 12,
+        // marginTop: 'auto',
+    },
+    bottomRow: {
+        justifyContent: 'space-between',
+        flexDirection: 'row',
+        marginTop: 'auto',
+        alignItems: 'flex-end'
+    },
+    text: {
+        fontSize: 18,
+        color: 'white',
+    },
+    video: {
+        alignSelf: 'center',
+        width: '100%',
+        height: '100%',
+    },
+    deleteButton: {
+        marginLeft: 24,
+        marginBottom: 12,
+    },
+    tickButton: {
+        marginRight: 24,
+        marginBottom: 12,
     },
 })  

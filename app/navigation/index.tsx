@@ -14,12 +14,13 @@ import Colors from '../constants/Colors';
 import useColorScheme from '../hooks/useColorScheme';
 import ModalScreen from '../screens/ModalScreen';
 import NotFoundScreen from '../screens/NotFoundScreen';
-import Home from '../screens/Home';
+import Record from '../screens/Record';
 import TabTwoScreen from '../screens/TabTwoScreen';
 import { RootStackParamList, RootTabParamList, RootTabScreenProps } from '../types';
 import LinkingConfiguration from './LinkingConfiguration';
 import Icon, { IC } from '../components/Icon';
 import Library from '../screens/Library';
+import Home from '../screens/Home';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { BLUE_COLOUR, ORANGE_COLOUR } from '../constants';
 
@@ -43,6 +44,7 @@ function RootNavigator() {
   return (
     <Stack.Navigator>
       <Stack.Screen name="Root" component={BottomTabNavigator} options={{ headerShown: false }} />
+      <Stack.Screen name="Record" component={Record} options={{ headerShown: false }} />
       <Stack.Screen name="NotFound" component={NotFoundScreen} options={{ title: 'Oops!' }} />
       <Stack.Group screenOptions={{ presentation: 'modal' }}>
         <Stack.Screen name="Modal" component={ModalScreen} />
@@ -63,17 +65,17 @@ function BottomTabNavigator() {
   return (
     <SafeAreaProvider>
       <BottomTab.Navigator
-        initialRouteName="Record"
+        initialRouteName="Home"
         screenOptions={{
           tabBarActiveTintColor: BLUE_COLOUR,
           headerShown: false,
         }}
       >
         <BottomTab.Screen
-          name="Record"
+          name="Home"
           component={Home}
-          options={({ navigation }: RootTabScreenProps<'Record'>) => ({
-            tabBarIcon: ({ color }) => <TabBarIcon name="microphone-alt" family='FontAwesome5' color={color} />,
+          options={({ navigation }: RootTabScreenProps<'Home'>) => ({
+            tabBarIcon: ({ color }) => <TabBarIcon name="home" family='Ionicons' color={color} />,
           })}
         />
         <BottomTab.Screen

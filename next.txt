@@ -1,1 +1,1 @@
-add loading,ß fetching permissions and list
+- fix camera distortion (https://stackoverflow.com/questions/58634905/camera-preview-in-expo-is-distorted)
