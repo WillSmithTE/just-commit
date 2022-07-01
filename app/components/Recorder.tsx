@@ -10,8 +10,10 @@ import { api } from '../services/api';
 import { useEffect, useState } from 'react';
 import { Camera, CameraType } from 'expo-camera';
 import { RootTabScreenProps } from '../types';
+import { VideoPlayback } from './VideoPlayback';
+import { NavigationProp, ParamListBase } from '@react-navigation/native';
 
-export const Recorder = ({ navigation }: RootTabScreenProps<'Home'>) => {
+export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListBase, string, any, any> }) => {
     const [recordingUri, setRecordingUri] = useState<string | undefined>();
     const [stopwatchReset, setReset] = useState(false)
     const [isRecording, setIsRecording] = useState(false)
@@ -48,7 +50,7 @@ export const Recorder = ({ navigation }: RootTabScreenProps<'Home'>) => {
     }
 
     return (!!recordingUri ?
-        <VideoPlayback uri={recordingUri} /> :
+        <VideoPlayback uri={recordingUri} navigation={navigation} /> :
         <Camera style={styles.camera} type={type} ref={ref => setCamera(ref!!)}>
             <View style={styles.buttonContainer}>
                 <TouchableOpacity
@@ -90,59 +92,6 @@ const StartRecordingIcon = () => <Icon family='MaterialCommunityIcons' name='rec
 
 const StopRecordingIcon = () => <Icon family='MaterialCommunityIcons' name='stop-circle' color='red' props={{ size: 150 }} />
 
-const VideoPlayback = ({ uri }: { uri: string }) => {
-    const video = React.useRef<Video>(null);
-    const [status, setStatus] = useState<AVPlaybackStatus | undefined>();
-
-    const pressDelete = () => {
-        console.log('deleting..')
-    }
-
-    const pressTick = () => {
-        console.log('saving..')
-    }
-
-    return <>
-        <Video
-            ref={video}
-            style={styles.video}
-            source={{ uri, }}
-            useNativeControls
-            resizeMode="contain"
-            isLooping={false}
-            onPlaybackStatusUpdate={newStatus => setStatus(() => newStatus)}
-        />
-        {
-            status?.isLoaded ?
-                <>
-                    <View style={styles.bottomRow}>
-                        <TouchableOpacity onPress={pressDelete} style={styles.deleteButton}>
-                            <Icon family='Entypo' name='trash' color='white' size={35} />
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() =>
-                            status?.isPlaying ?
-                                video.current!!.pauseAsync().catch(console.error)
-                                : video.current!!.playAsync().catch(console.error)
-                        }>
-                            {status.isPlaying ?
-                                <Icon family='Ionicons' name='stop-circle' color='red' size={60} /> :
-                                <Icon family='Ionicons' name='play-circle' color='red' size={60} />
-                            }
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={pressTick} style={styles.tickButton}>
-                            <Icon family='Entypo' name='check' color='white' size={35} />
-                        </TouchableOpacity>
-                    </View>
-                </> :
-                <Loading />
-        }
-    </>
-}
-
-const Loading = () => <View>
-    <ActivityIndicator />
-</View>
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -167,10 +116,8 @@ const styles = StyleSheet.create({
         // marginTop: 'auto'
     },
     flipButton: {
-        // marginLeft: 'auto',
         marginRight: 12,
         marginBottom: 12,
-        // marginTop: 'auto',
     },
     bottomRow: {
         justifyContent: 'space-between',
