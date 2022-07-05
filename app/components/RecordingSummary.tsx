@@ -2,14 +2,14 @@ import React, { useEffect, useState, memo } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Icon from './Icon';
 import { DeleteButton } from './DeleteButton';
-import { Song } from '../types';
+import { Video } from '../types';
 import millisToMin from '../services/millisToMin';
 import { ORANGE_COLOUR } from '../constants';
 import { Audio } from 'expo-av';
 
 export const RecordingSummary = ({
     song,
-}: { song: Song }) => {
+}: { song: Video }) => {
     const [moreOptionsModal, setMoreOptionsModal] = useState(false);
     const [sound, setSound] = React.useState<Audio.Sound | undefined>();
     const [isPlaying, setIsPlaying] = React.useState(false);

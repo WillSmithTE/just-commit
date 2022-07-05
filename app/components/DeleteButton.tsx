@@ -4,10 +4,10 @@ import { useSelector, useDispatch } from 'react-redux'
 import { deleteSong } from '../services/songSlice';
 import Icon, { DownloadedIcon } from './Icon';
 import { api } from '../services/api';
-import { Song } from '../types';
+import { Video } from '../types';
 import { ORANGE_COLOUR } from '../constants';
 
-export const DeleteButton = ({ song }: {song: Song}) => {
+export const DeleteButton = ({ song }: {song: Video}) => {
 	const dispatch = useDispatch()
 
 	const deleteDownload = async () => {

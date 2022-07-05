@@ -1,9 +1,9 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { Song } from '../types'
+import { Video } from '../types'
 import { api } from './api'
 
 export interface SongState {
-    songs: Song[] | undefined
+    songs: Video[] | undefined
 }
 
 const initialState: SongState = {
@@ -24,7 +24,7 @@ export const songSlice = createSlice({
     name: 'song',
     initialState,
     reducers: {
-        addSong: (state, action: PayloadAction<Song>) => {
+        addSong: (state, action: PayloadAction<Video>) => {
             state.songs = state.songs ? [action.payload].concat(state.songs) : [action.payload]
         },
         deleteSong: (state, action: PayloadAction<string>) => {

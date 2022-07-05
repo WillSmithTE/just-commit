@@ -1,16 +1,10 @@
 import * as React from 'react';
-import { Text, View, StyleSheet, Button, TouchableOpacity, ActivityIndicator, Alert, Modal, Pressable } from 'react-native';
-import { Audio, AVPlaybackStatus, Video } from 'expo-av';
+import { View, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { AVPlaybackStatus, Video } from 'expo-av';
 import Icon from './Icon';
-import { formatTime, useTimer } from './useTimer'
-import Toast from 'react-native-root-toast';
-import { useDispatch } from 'react-redux';
-import { addSong } from '../services/songSlice';
-import { api } from '../services/api';
-import { useEffect, useState } from 'react';
-import { Camera, CameraType } from 'expo-camera';
-import { RootTabScreenProps } from '../types';
+import { useState } from 'react';
 import { NavigationProp, ParamListBase } from '@react-navigation/native';
+import { SaveModal } from './SaveModal';
 
 export const VideoPlayback = ({ uri, navigation }: { uri: string, navigation: NavigationProp<ParamListBase, string, any, any> }) => {
     const video = React.useRef<Video>(null);
@@ -70,35 +64,12 @@ export const VideoPlayback = ({ uri, navigation }: { uri: string, navigation: Na
                         <TouchableOpacity onPress={pressTick} style={styles.tickButton}>
                             <Icon family='Entypo' name='check' color='white' size={50} />
                         </TouchableOpacity>
-                        <SaveModal isVisible={isSaveModalVisible} setVisible={setSaveModalVisible} />
+                        <SaveModal isVisible={isSaveModalVisible} setVisible={setSaveModalVisible} uri={uri} />
                     </View>
                 </> :
                 <Loading />
         }
     </>
-}
-
-const SaveModal = ({ isVisible, setVisible }: { isVisible: boolean, setVisible: (val: boolean) => void }) => {
-    return <Modal
-        animationType="slide"
-        transparent={true}
-        visible={isVisible}
-        onRequestClose={() => {
-            Alert.alert('Modal has been closed.');
-            setVisible(!isVisible);
-        }}>
-        <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-                <Text style={styles.modalText}>Hello World!</Text>
-                <Pressable
-                    style={[styles.button, styles.buttonClose]}
-                    onPress={() => setVisible(!isVisible)}>
-                    <Text style={styles.textStyle}>Hide Modal</Text>
-                </Pressable>
-            </View>
-        </View>
-    </Modal>
-
 }
 
 const Loading = () => <View>

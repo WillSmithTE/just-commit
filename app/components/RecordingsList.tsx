@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useQuery } from 'react-query';
 
 import { api } from '../services/api';
-import { Song } from '../types';
+import { Video } from '../types';
 import { jsonString } from '../util';
 import { RecordingSummary } from './RecordingSummary';
 import { useDispatch, useSelector } from 'react-redux';
