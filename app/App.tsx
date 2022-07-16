@@ -6,40 +6,36 @@ import { Provider } from 'react-redux';
 import usePreloadResources from './hooks/usePreloadResources';
 import useColorScheme from './hooks/useColorScheme';
 import Navigation from './navigation';
-import { store } from './services/reduxStore';
+import { persistor, store } from './services/reduxStore';
 import { RootSiblingParent } from 'react-native-root-siblings';
 import { Dimensions, Image, StyleSheet } from 'react-native';
+import React from 'react';
+import { PersistGate } from 'redux-persist/integration/react'
 
 const queryClient = new QueryClient()
 
 export default function App() {
-  const colorScheme = useColorScheme();
-
   return (
-      <RootSiblingParent>
-        <Provider store={store}>
+    <RootSiblingParent>
+      <Provider store={store}>
+        <PersistGate loading={null} persistor={persistor}>
           <AppInternals />
-        </Provider>
-      </RootSiblingParent>
+        </PersistGate>
+      </Provider>
+    </RootSiblingParent>
   );
 }
 
-// just to get the loading stuff inside the redux provider
 const AppInternals = () => {
-  const isLoadingComplete = usePreloadResources();
+  // const isLoadingComplete = usePreloadResources();
   const colorScheme = useColorScheme();
 
-  if (!isLoadingComplete) {
-    return null
-  } else {
-    return (
-      <QueryClientProvider client={queryClient}>
-          <Navigation colorScheme={colorScheme} />
-        <StatusBar />
-      </QueryClientProvider>
-    );
-  }
-
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Navigation colorScheme={colorScheme} />
+      <StatusBar />
+    </QueryClientProvider>
+  );
 }
 
 const { width, height } = Dimensions.get('screen');

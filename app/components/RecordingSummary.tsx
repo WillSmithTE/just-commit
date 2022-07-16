@@ -1,39 +1,18 @@
 import React, { useEffect, useState, memo } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Icon from './Icon';
-import { DeleteButton } from './DeleteButton';
-import { Video } from '../types';
+import { GetVideoHeading, MyVideo } from '../types';
 import millisToMin from '../services/millisToMin';
 import { ORANGE_COLOUR } from '../constants';
 import { Audio } from 'expo-av';
+import { useDispatch } from 'react-redux';
+import { selectMedia } from '../services/selectedMediaSlice';
 
-export const RecordingSummary = ({
-    song,
-}: { song: Video }) => {
+export const RecordingSummary = ({ media, }: { media: MyVideo }) => {
     const [moreOptionsModal, setMoreOptionsModal] = useState(false);
     const [sound, setSound] = React.useState<Audio.Sound | undefined>();
     const [isPlaying, setIsPlaying] = React.useState(false);
-
-    async function playOrPause() {
-        if (isPlaying) {
-            console.log('pausing Sound');
-            await sound?.pauseAsync
-        } else if (sound) {
-            console.log('resuming sound')
-            await sound?.playAsync()
-        } else {
-            console.log('Loading Sound');
-            const { sound } = await Audio.Sound.createAsync(
-                { uri: song.uri!! },
-                {},
-                (status) => {if (status.didJustFinish) { finish()}}
-                );
-            setSound(sound);
-            console.log('Playing Sound');
-            await sound.playAsync();
-            setIsPlaying(true)
-        }
-    }
+    const dispatch = useDispatch()
 
     const finish = () => {
         setIsPlaying(false)
@@ -48,26 +27,22 @@ export const RecordingSummary = ({
     }, [sound]);
 
     return (
-        <>
+        <TouchableOpacity onPress={() => dispatch(selectMedia(media))}>
             <View style={styles.container} >
                 <View >
                     <View>
                         <Text style={styles.title}>
-                            {song.title}
+                            {GetVideoHeading(media)}
                         </Text>
                     </View>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                        <Text style={styles.duration}>{millisToMin(song.durationMillis)}</Text>
+                        <Text style={styles.duration}>{media.notificationDate}</Text>
+                        <Text style={styles.duration}>{millisToMin(media.duration)}</Text>
                         {/* <DeleteButton song={song} /> */}
                     </View>
                 </View>
-                <View style={styles.playBtn}>
-                    <TouchableOpacity onPress={playOrPause}>
-                        <Icon family='AntDesign' name={isPlaying ? 'pausecircle' : "play"} color={ORANGE_COLOUR} />
-                    </TouchableOpacity>
-                </View>
             </View>
-        </>
+        </TouchableOpacity>
     );
 };
 

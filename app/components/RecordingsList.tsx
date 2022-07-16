@@ -1,28 +1,17 @@
-import React, { memo, useEffect, useState } from 'react';
+import React, { } from 'react';
 import { ScrollView, StyleSheet, Text } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { useQuery } from 'react-query';
 
-import { api } from '../services/api';
-import { Video } from '../types';
-import { jsonString } from '../util';
 import { RecordingSummary } from './RecordingSummary';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from '../services/reduxStore';
-import { getRecordingsThunk } from '../services/songSlice';
 
-export const RecordingsList = () => {
+type RecordingsListProps = {
+    timeUntil?: Date,
+}
 
-    const songs = useSelector((state: RootState) => state.song.songs)
-    const dispatch = useDispatch()
-    React.useEffect(() => {
-        console.log(`songsInEffect=${jsonString(songs)}`)
-        if (!songs) {
-            console.log(`in nnegative`)
-            dispatch(getRecordingsThunk())
-        }
-    }, [])
+export const RecordingsList = ({ timeUntil }: RecordingsListProps) => {
 
+    const medias = useSelector((state: RootState) => state.media.medias)
     return (
         <ScrollView
             style={styles.container}
@@ -31,13 +20,15 @@ export const RecordingsList = () => {
             }}
             showsVerticalScrollIndicator
         >
-            {songs?.length === 0 && <Text>Make your first recording to see it here.</Text>}
-            {songs?.map((song) => (
-                <RecordingSummary
-                    key={song.id}
-                    song={song}
-                />
-            ))}
+            {medias === undefined || medias.length === 0 ?
+                <Text>Make your first video to see it here.</Text> :
+                medias.map((media) => (
+                    <RecordingSummary
+                        key={media.id}
+                        media={media}
+                    />
+                ))
+            }
         </ScrollView>
     );
 };

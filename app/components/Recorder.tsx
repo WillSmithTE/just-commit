@@ -1,21 +1,14 @@
 import * as React from 'react';
-import { Text, View, StyleSheet, Button, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { Audio, AVPlaybackStatus, Video } from 'expo-av';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from './Icon';
-import { formatTime, useTimer } from './useTimer'
-import Toast from 'react-native-root-toast';
 import { useDispatch } from 'react-redux';
-import { addSong } from '../services/songSlice';
-import { api } from '../services/api';
 import { useEffect, useState } from 'react';
 import { Camera, CameraType } from 'expo-camera';
-import { RootTabScreenProps } from '../types';
 import { VideoPlayback } from './VideoPlayback';
 import { NavigationProp, ParamListBase } from '@react-navigation/native';
+import { selectMedia } from '../services/selectedMediaSlice';
 
 export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListBase, string, any, any> }) => {
-    const [recordingUri, setRecordingUri] = useState<string | undefined>();
-    const [stopwatchReset, setReset] = useState(false)
     const [isRecording, setIsRecording] = useState(false)
     const [hasPermission, setHasPermission] = useState(false);
     const [type, setType] = useState(CameraType.back);
@@ -27,7 +20,6 @@ export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListB
         (async () => {
             const { status: cameraStatus } = await Camera.requestCameraPermissionsAsync();
             const { status: audioStatus } = await Camera.requestMicrophonePermissionsAsync();
-
             setHasPermission(cameraStatus === 'granted' && audioStatus === 'granted');
         })();
     }, []);
@@ -35,8 +27,8 @@ export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListB
     const startRecording = async () => {
         setIsRecording(true)
         const newUri = (await camera!!.recordAsync()).uri
-        console.log(newUri);
-        setRecordingUri(newUri);
+        console.log(`new recording (uri=${newUri}`);
+        dispatch(selectMedia({ uri: newUri }))
     }
 
     const stopRecording = async () => {
@@ -45,12 +37,11 @@ export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListB
     }
 
     if (hasPermission === null) {
-        console.warn(`no permissions for camera recording`)
+        console.error(`no permissions for camera recording`)
         return <View />;
     }
 
-    return (!!recordingUri ?
-        <VideoPlayback uri={recordingUri} navigation={navigation} /> :
+    return (
         <Camera style={styles.camera} type={type} ref={ref => setCamera(ref!!)}>
             <View style={styles.buttonContainer}>
                 <TouchableOpacity

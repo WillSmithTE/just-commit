@@ -18,7 +18,6 @@ export type RootStackParamList = {
   Root: NavigatorScreenParams<RootTabParamList> | undefined;
   Modal: undefined;
   NotFound: undefined;
-  Record: undefined;
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> = NativeStackScreenProps<
@@ -29,6 +28,7 @@ export type RootStackScreenProps<Screen extends keyof RootStackParamList> = Nati
 export type RootTabParamList = {
   Library: undefined;
   Home: undefined;
+  Record: undefined;
 };
 
 export type RootTabScreenProps<Screen extends keyof RootTabParamList> = CompositeScreenProps<
@@ -36,4 +36,15 @@ export type RootTabScreenProps<Screen extends keyof RootTabParamList> = Composit
   NativeStackScreenProps<RootStackParamList>
 >;
 
-export type Video = MediaLibrary.Asset
+export type MyVideo = MediaLibrary.Asset & {
+  title?: string,
+  notificationDate?: Date,
+  notificationId?: string,
+  isNotificationAcknowledged?: boolean,
+}
+
+export function GetVideoHeading(video: MyVideo): string {
+  return video.title ?? video.notificationDate?.toString() ?? new Date(video.creationTime).toString()
+}
+
+export type AtLeast<T, K extends keyof T> = Partial<T> & Pick<T, K>

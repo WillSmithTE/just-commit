@@ -1,3 +1,4 @@
+import React from 'react';
 import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -11,7 +12,7 @@ export default function Library({ navigation }: RootTabScreenProps<'Record'>) {
   return (
     <SafeAreaView style={{flex: 1}}>
       <View style={styles.container}>
-        <Text style={styles.title}>My Thoughts</Text>
+        <Text style={styles.title}>Library</Text>
         <RecordingsList />
       </View>
     </SafeAreaView>
@@ -30,6 +31,8 @@ const styles = StyleSheet.create({
     fontSize: 40,
     fontWeight: 'bold',
     color: 'white',
+    paddingTop: 10,
+    paddingLeft: 10,
   },
   separator: {
     marginVertical: 30,

@@ -4,34 +4,72 @@ import { AVPlaybackStatus, Video } from 'expo-av';
 import Icon from './Icon';
 import { useState } from 'react';
 import { NavigationProp, ParamListBase } from '@react-navigation/native';
-import { SaveModal } from './SaveModal';
+import { SaveEditModal } from './SaveEditModal';
+import { AtLeast, MyVideo } from '../types';
+import { useDispatch, useSelector } from 'react-redux';
+import { clearSelectedMedia } from '../services/selectedMediaSlice';
+import { RootState } from '../services/reduxStore';
 
-export const VideoPlayback = ({ uri, navigation }: { uri: string, navigation: NavigationProp<ParamListBase, string, any, any> }) => {
-    const video = React.useRef<Video>(null);
+type VideoPlaybackProps = {
+    video:  AtLeast<MyVideo, 'uri'>,
+}
+
+export const VideoPlayback = ({ video: selectedVideo }: VideoPlaybackProps) => {
+    const playbackVideo = React.useRef<Video>(null);
     const [status, setStatus] = useState<AVPlaybackStatus | undefined>();
     const [isSaveModalVisible, setSaveModalVisible] = useState(false)
 
+    const dispatch = useDispatch()
+
+    const isNewVideo = selectedVideo.id === undefined
+
     const pressExit = () => {
-        Alert.alert('Are you sure?', undefined, [
-            {
-                text: 'Cancel',
-                onPress: () => { },
-                style: 'cancel',
-            },
-            { text: 'Delete', onPress: () => navigation.goBack() },
-        ])
+        if (isNewVideo) {
+            Alert.alert('Are you sure?', undefined, [
+                {
+                    text: 'Cancel',
+                    onPress: () => { },
+                    style: 'cancel',
+                },
+                {
+                    text: 'Delete', onPress: () => {
+                        dispatch(clearSelectedMedia())
+                    }
+                },
+            ])
+        } else {
+            dispatch(clearSelectedMedia())
+        }
     }
 
-    const pressTick = () => {
-        console.log('saving..')
+    const pressEdit = () => {
         setSaveModalVisible(true)
+    }
+
+    const deleteVideo = () => {
+
+    }
+
+    const pressTrash = () => {
+        if (isNewVideo) {
+            Alert.alert('Are you sure?', undefined, [
+                {
+                    text: 'Cancel',
+                    onPress: () => { },
+                    style: 'cancel',
+                },
+                {
+                    text: 'Delete', onPress: deleteVideo
+                },
+            ])
+        }
     }
 
     return <>
         <Video
-            ref={video}
+            ref={playbackVideo}
             style={styles.video}
-            source={{ uri, }}
+            source={{ uri: selectedVideo!!.uri, }}
             useNativeControls={false}
             resizeMode="contain"
             isLooping={false}
@@ -48,23 +86,25 @@ export const VideoPlayback = ({ uri, navigation }: { uri: string, navigation: Na
             status?.isLoaded ?
                 <>
                     <View style={styles.bottomRow}>
-                        <TouchableOpacity style={styles.invisibleButton}>
+                        <TouchableOpacity onPress={pressTrash} style={isNewVideo ? styles.invisibleButton : styles.trashButton}>
                             <Icon family='Entypo' name='trash' color='white' size={50} />
                         </TouchableOpacity>
                         <TouchableOpacity onPress={() =>
                             status?.isPlaying ?
-                                video.current!!.pauseAsync().catch(console.error)
-                                : video.current!!.playAsync().catch(console.error)
+                                playbackVideo.current!!.pauseAsync().catch(console.error)
+                                : playbackVideo.current!!.playAsync().catch(console.error)
                         }>
                             {status.isPlaying ?
                                 <Icon family='Ionicons' name='pause-circle' color='red' size={90} /> :
                                 <Icon family='Ionicons' name='play-circle' color='red' size={90} />
                             }
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={pressTick} style={styles.tickButton}>
-                            <Icon family='Entypo' name='check' color='white' size={50} />
+                        <TouchableOpacity onPress={pressEdit} style={styles.tickButton}>
+                            {isNewVideo ?
+                                <Icon family='Entypo' name='check' color='white' size={50} /> :
+                                <Icon family='Entypo' name='edit' color='white' size={50} />}
                         </TouchableOpacity>
-                        <SaveModal isVisible={isSaveModalVisible} setVisible={setSaveModalVisible} uri={uri} />
+                        <SaveEditModal isVisible={isSaveModalVisible} setVisible={setSaveModalVisible} video={selectedVideo!!} />
                     </View>
                 </> :
                 <Loading />
@@ -129,6 +169,10 @@ const styles = StyleSheet.create({
     },
     tickButton: {
         marginRight: 24,
+        marginBottom: 12,
+    },
+    trashButton: {
+        marginLeft: 24,
         marginBottom: 12,
     },
     centeredView: {

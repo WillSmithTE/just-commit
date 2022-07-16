@@ -14,7 +14,7 @@ import Colors from '../constants/Colors';
 import useColorScheme from '../hooks/useColorScheme';
 import ModalScreen from '../screens/ModalScreen';
 import NotFoundScreen from '../screens/NotFoundScreen';
-import Record from '../screens/Record';
+import RecordScreen from '../screens/Record';
 import TabTwoScreen from '../screens/TabTwoScreen';
 import { RootStackParamList, RootTabParamList, RootTabScreenProps } from '../types';
 import LinkingConfiguration from './LinkingConfiguration';
@@ -23,6 +23,9 @@ import Library from '../screens/Library';
 import Home from '../screens/Home';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { BLUE_COLOUR, ORANGE_COLOUR } from '../constants';
+import { useSelector } from 'react-redux';
+import { RootState } from '../services/reduxStore';
+import { VideoPlayback } from '../components/VideoPlayback';
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
   return (
@@ -44,7 +47,6 @@ function RootNavigator() {
   return (
     <Stack.Navigator>
       <Stack.Screen name="Root" component={BottomTabNavigator} options={{ headerShown: false }} />
-      <Stack.Screen name="Record" component={Record} options={{ headerShown: false }} />
       <Stack.Screen name="NotFound" component={NotFoundScreen} options={{ title: 'Oops!' }} />
       <Stack.Group screenOptions={{ presentation: 'modal' }}>
         <Stack.Screen name="Modal" component={ModalScreen} />
@@ -61,6 +63,13 @@ const BottomTab = createBottomTabNavigator<RootTabParamList>();
 
 function BottomTabNavigator() {
   const colorScheme = useColorScheme();
+  const selectedVideo = useSelector((state: RootState) => state.selectedMedia.selectedMedia)
+
+  const withPlayback = (component: React.ComponentType<any>) => {
+    return selectedVideo ?
+      (props: {}) => <VideoPlayback video={selectedVideo} {...props} /> :
+      component
+  }
 
   return (
     <SafeAreaProvider>
@@ -73,14 +82,21 @@ function BottomTabNavigator() {
       >
         <BottomTab.Screen
           name="Home"
-          component={Home}
+          component={withPlayback(Home)}
           options={({ navigation }: RootTabScreenProps<'Home'>) => ({
             tabBarIcon: ({ color }) => <TabBarIcon name="home" family='Ionicons' color={color} />,
           })}
         />
         <BottomTab.Screen
+          name="Record"
+          component={withPlayback(RecordScreen)}
+          options={({ navigation }: RootTabScreenProps<'Record'>) => ({
+            tabBarIcon: ({ color }) => <TabBarIcon name="record-circle" family='MaterialCommunityIcons' color={color} />,
+          })}
+        />
+        <BottomTab.Screen
           name="Library"
-          component={Library}
+          component={withPlayback(Library)}
           options={({ navigation }: RootTabScreenProps<'Library'>) => ({
             tabBarIcon: ({ color }) => <TabBarIcon name="library" family='Ionicons' color={color} />,
           })}

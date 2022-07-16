@@ -4,7 +4,7 @@ import * as Font from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { Dispatch, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { getRecordingsThunk } from '../services/songSlice';
+import { getMediaThunk } from '../services/mediaSlice';
 
 export default function usePreloadResources() {
   const [isLoadingComplete, setLoadingComplete] = useState(false);
@@ -42,4 +42,4 @@ const loadFonts = async () => await Font.loadAsync({
   'space-mono': require('../assets/fonts/SpaceMono-Regular.ttf'),
 });
 
-const loadSavedRecordings = async (dispatch: any) => await dispatch(getRecordingsThunk())
+const loadSavedRecordings = async (dispatch: any) => await dispatch(getMediaThunk())
