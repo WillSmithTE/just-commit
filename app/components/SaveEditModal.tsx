@@ -9,7 +9,8 @@ import { registerForNotificationsAsync } from './Notification';
 import { AtLeast, MyVideo } from '../types';
 import { useDispatch } from 'react-redux';
 import { upsertMedia } from '../services/mediaSlice';
-import { Button } from 'react-native-paper';
+import { Button, Checkbox } from 'react-native-paper';
+import { clearSelectedMedia } from '../services/selectedMediaSlice';
 
 type SaveEditModalProps = {
     isVisible: boolean,
@@ -19,7 +20,7 @@ type SaveEditModalProps = {
 
 export const SaveEditModal = ({ isVisible, setVisible, video }: SaveEditModalProps) => {
     const [editingTitle, setTitle] = useState(video.title || '')
-    const [editingDate, setDate] = useState<Date | undefined>(video.notificationDate)
+    const [date, setDate] = useState<Date | undefined>(video.notificationDate)
     const [dateOpen, setDateOpen] = useState(false)
     const [permissionsStatus, requestPermission] = MediaLibrary.usePermissions();
     const [isLoading, setLoading] = useState(false)
@@ -37,9 +38,10 @@ export const SaveEditModal = ({ isVisible, setVisible, video }: SaveEditModalPro
             deleteOldNotification(video),
             registerForNotification()
         ])
-        dispatch(upsertMedia({ ...asset, notificationDate: editingDate, notificationId }))
         setVisible(false)
         setLoading(false)
+        dispatch(upsertMedia({ ...asset, notificationDate: date, notificationId }))
+        dispatch(clearSelectedMedia())
     }
 
     return <Modal
@@ -52,28 +54,21 @@ export const SaveEditModal = ({ isVisible, setVisible, video }: SaveEditModalPro
         {isLoading && <Loading />}
         <View style={styles.centeredView}>
             <View style={styles.modalView}>
-                <Text style={{ ...styles.modalText, ...styles.titleText }} >Save Video</Text>
-                <TextInput style={styles.modalText} value={editingTitle} onChangeText={setTitle} />
-                <TouchableOpacity onPress={() => {
-                    if (editingDate === undefined) setDate(new Date())
-                    setDateOpen(true)
-                }}>
-                    <TextInput value={editingDate ? editingDate.toString() : 'None'} />
-                </TouchableOpacity>
-                {editingDate && <DatePicker
-                    modal
-                    open={dateOpen}
-                    date={editingDate}
-                    onConfirm={(newDate) => {
-                        setDate(newDate)
-                        setDateOpen(false)
-                    }}
-                    onCancel={() => {
-                        setDateOpen(false)
-                    }}
-                />}
-                <Button color={'blue'} mode='contained' onPress={onPressSave}>Save</Button>
-                <Button color={'gray'} mode='outlined' onPress={() => setVisible(false)}>Cancel</Button>
+                {/* <Text style={{ ...styles.modalHeader }} >Save Video</Text> */}
+                <Text style={{ ...styles.titleLabel }}>Title</Text>
+                <TextInput style={styles.titleTextInput} value={editingTitle} onChangeText={setTitle} autoFocus />
+                <View style={styles.notificationRow}>
+                    <Text style={{}} >Notification</Text>
+                    <Checkbox
+                        status={date ? 'checked' : 'unchecked'}
+                        onPress={() => setDate(date ? undefined : new Date())}
+                    />
+                </View>
+                {date && <DatePicker date={date} onDateChange={setDate} />}
+                <View style={styles.buttonContainer}>
+                    <Button style={styles.button} color={'blue'} mode='contained' onPress={onPressSave}>Save</Button>
+                    <Button style={styles.button} color={'gray'} mode='outlined' onPress={() => setVisible(false)}>Cancel</Button>
+                </View>
             </View>
         </View>
     </Modal>
@@ -110,27 +105,30 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        marginTop: 22,
     },
     modalView: {
-        margin: 20,
+        opacity: 0.8,
         backgroundColor: 'white',
         borderRadius: 20,
-        padding: 35,
+        paddingVertical: 10,
+        paddingHorizontal: 30,
         alignItems: 'center',
         shadowColor: '#000',
         shadowOffset: {
             width: 0,
             height: 2,
         },
-        shadowOpacity: 0.25,
+        shadowOpacity: 0.5,
         shadowRadius: 4,
         elevation: 5,
+        minWidth: 200,
     },
     button: {
-        borderRadius: 20,
-        padding: 10,
-        elevation: 2,
+        borderRadius: 5,
+        // padding: 10,
+        marginBottom: 15,
+        // width: '80%',
+        // elevation: 2,
     },
     buttonOpen: {
         backgroundColor: '#F194FF',
@@ -143,12 +141,33 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         textAlign: 'center',
     },
-    modalText: {
+    modalHeader: {
         marginBottom: 15,
         textAlign: 'center',
-    },
-    titleText: {
         fontSize: 20,
         fontWeight: 'bold',
+    },
+    titleLabel: {
+        fontWeight: 'bold',
+        marginBottom: 5,
+        textAlign: 'left',
+        fontSize: 15,
+        alignSelf: 'stretch',
+    },
+    titleTextInput: {
+        marginBottom: 15,
+        textAlign: 'left',
+        fontSize: 15,
+        alignSelf: 'stretch',
+        // backgroundColor: '#AF9696'
+    },
+    notificationRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingBottom: 15,
+        justifyContent: 'space-between'
+    },
+    buttonContainer: {
+        alignSelf: 'stretch'
     },
 })  

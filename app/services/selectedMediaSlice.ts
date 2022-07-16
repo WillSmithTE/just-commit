@@ -15,6 +15,7 @@ export const selectedMediaSlice = createSlice({
     reducers: {
         selectMedia: (state, action: PayloadAction<AtLeast<MyVideo, 'uri'>>) => {
             state.selectedMedia = action.payload
+            console.log('setting new media')
         },
         clearSelectedMedia: (state, _: PayloadAction<void>) => {
             state.selectedMedia = undefined
