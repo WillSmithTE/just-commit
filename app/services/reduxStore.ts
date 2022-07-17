@@ -17,7 +17,7 @@ const persistConfig = {
   key: 'root',
   version: 1,
   storage: AsyncStorage,
-  blacklist: ['selectedMedia'],
+  blacklist: ['selectedMedia', 'selected-media'],
 }
 
 const rootReducer = combineReducers({
@@ -35,7 +35,7 @@ export const store = configureStore({
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
     }),
-    devTools: true,
+    devTools: false,
 });
 
 export const persistor = persistStore(store)
