@@ -65,7 +65,6 @@ export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListB
                             <Icon family='MaterialIcons' name='flip-camera-ios' color='white' props={{ size: 35 }} />
                         </TouchableOpacity>
                     </View>
-
                 </View>
             </Camera>
             }
