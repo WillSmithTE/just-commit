@@ -11,6 +11,7 @@ import { useDispatch } from 'react-redux';
 import { upsertMedia } from '../services/mediaSlice';
 import { Button, Checkbox } from 'react-native-paper';
 import { clearSelectedMedia } from '../services/selectedMediaSlice';
+import { useNavigation } from '@react-navigation/native';
 
 type SaveEditModalProps = {
     isVisible: boolean,
@@ -19,12 +20,15 @@ type SaveEditModalProps = {
 }
 
 export const SaveEditModal = ({ isVisible, setVisible, video }: SaveEditModalProps) => {
-    const [editingTitle, setTitle] = useState(video.title || '')
+    const [title, setTitle] = useState(video.title || '')
     const [date, setDate] = useState<Date | undefined>(video.notificationDate)
     const [dateOpen, setDateOpen] = useState(false)
     const [permissionsStatus, requestPermission] = MediaLibrary.usePermissions();
     const [isLoading, setLoading] = useState(false)
     const dispatch = useDispatch()
+    const navigation = useNavigation();
+
+    console.debug(`Rendering modal`)
 
     const onPressSave = async () => {
         setLoading(true)
@@ -38,10 +42,11 @@ export const SaveEditModal = ({ isVisible, setVisible, video }: SaveEditModalPro
             deleteOldNotification(video),
             registerForNotification()
         ])
-        setVisible(false)
+        dispatch(upsertMedia({ ...asset, notificationDate: date, notificationId, title }))
         setLoading(false)
-        dispatch(upsertMedia({ ...asset, notificationDate: date, notificationId }))
-        dispatch(clearSelectedMedia())
+        setVisible(false)
+
+        navigation.goBack()
     }
 
     return <Modal
@@ -54,9 +59,8 @@ export const SaveEditModal = ({ isVisible, setVisible, video }: SaveEditModalPro
         {isLoading && <Loading />}
         <View style={styles.centeredView}>
             <View style={styles.modalView}>
-                {/* <Text style={{ ...styles.modalHeader }} >Save Video</Text> */}
                 <Text style={{ ...styles.titleLabel }}>Title</Text>
-                <TextInput style={styles.titleTextInput} value={editingTitle} onChangeText={setTitle} autoFocus />
+                <TextInput style={styles.titleTextInput} value={title} onChangeText={setTitle} autoFocus />
                 <View style={styles.notificationRow}>
                     <Text style={{}} >Notification</Text>
                     <Checkbox

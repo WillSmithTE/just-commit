@@ -5,23 +5,31 @@ import Icon from './Icon';
 import { useState } from 'react';
 import { NavigationProp, ParamListBase } from '@react-navigation/native';
 import { SaveEditModal } from './SaveEditModal';
-import { AtLeast, MyVideo } from '../types';
+import { AtLeast, MyVideo, RootStackScreenProps, RootTabScreenProps } from '../types';
 import { useDispatch, useSelector } from 'react-redux';
 import { clearSelectedMedia } from '../services/selectedMediaSlice';
 import { RootState } from '../services/reduxStore';
+import { useNavigation } from '@react-navigation/native';
 
-type VideoPlaybackProps = {
-    video:  AtLeast<MyVideo, 'uri'>,
+type VideoPlaybackProps = RootStackScreenProps<'Playback'> & {
+video: AtLeast<MyVideo, 'uri'>,
 }
+// type VideoPlaybackProps = {
+//     video: AtLeast<MyVideo, 'uri'>,
+// }
 
-export const VideoPlayback = ({ video: selectedVideo }: VideoPlaybackProps) => {
+export const VideoPlayback = ({ route: { params: { video: selectedVideo } } }: VideoPlaybackProps) => {
+// export const VideoPlayback = ({ video: selectedVideo }: VideoPlaybackProps) => {
     const playbackVideo = React.useRef<Video>(null);
     const [status, setStatus] = useState<AVPlaybackStatus | undefined>();
     const [isSaveModalVisible, setSaveModalVisible] = useState(false)
+    const navigation = useNavigation();
 
     const dispatch = useDispatch()
 
     const isNewVideo = selectedVideo.id === undefined
+
+    const exit = () => navigation.goBack()
 
     const pressExit = () => {
         if (isNewVideo) {
@@ -33,12 +41,12 @@ export const VideoPlayback = ({ video: selectedVideo }: VideoPlaybackProps) => {
                 },
                 {
                     text: 'Delete', onPress: () => {
-                        dispatch(clearSelectedMedia())
+                        exit()
                     }
                 },
             ])
         } else {
-            dispatch(clearSelectedMedia())
+            exit()
         }
     }
 

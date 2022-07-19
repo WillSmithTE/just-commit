@@ -47,6 +47,7 @@ function RootNavigator() {
   return (
     <Stack.Navigator>
       <Stack.Screen name="Root" component={BottomTabNavigator} options={{ headerShown: false }} />
+      <Stack.Screen name="Playback" component={VideoPlayback} options={{ headerShown: false }} />
       <Stack.Screen name="NotFound" component={NotFoundScreen} options={{ title: 'Oops!' }} />
       <Stack.Group screenOptions={{ presentation: 'modal' }}>
         <Stack.Screen name="Modal" component={ModalScreen} />
@@ -66,9 +67,10 @@ function BottomTabNavigator() {
   const selectedVideo = useSelector((state: RootState) => state.selectedMedia.selectedMedia)
 
   const withPlayback = (component: React.ComponentType<any>) => {
-    return selectedVideo ?
-      (props: {}) => <VideoPlayback video={selectedVideo} {...props} /> :
-      component
+    // return selectedVideo ?
+    //   (props: {}) => <VideoPlayback video={selectedVideo} {...props} /> :
+    //   component
+    return component
   }
 
   return (
