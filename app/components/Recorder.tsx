@@ -1,22 +1,16 @@
 import * as React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from './Icon';
-import { useDispatch } from 'react-redux';
 import { useEffect, useState } from 'react';
 import { Camera, CameraType } from 'expo-camera';
-import { VideoPlayback } from './VideoPlayback';
 import { NavigationProp, ParamListBase } from '@react-navigation/native';
-import { selectMedia } from '../services/selectedMediaSlice';
-import { Loading } from './Loading';
 import { useIsFocused } from '@react-navigation/native';
 
 export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListBase, string, any, any> }) => {
     const [isRecording, setIsRecording] = useState(false)
-    const [isLoading, setIsLoading] = useState(false)
     const [hasPermission, setHasPermission] = useState(false);
     const [type, setType] = useState(CameraType.back);
     const [camera, setCamera] = useState<Camera | undefined>();
-    const [uri, setUri] = useState<string | undefined>()
     const isFocused = useIsFocused();
 
     useEffect(() => {
@@ -29,18 +23,13 @@ export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListB
 
     const startRecording = async () => {
         setIsRecording(true)
-        const newUri = (await camera!!.recordAsync()).uri
-        console.log('after recordAsync')
-        setUri(newUri)
-        setCamera(undefined)
-        console.log(`new recording (uri=${newUri}`);
-        setIsLoading(false)
-        navigation.navigate('Playback', { video: { uri: newUri } })
+        const { uri } = await camera!!.recordAsync()
+        // setCamera(undefined)
+        console.log(`new recording (uri=${uri}`);
+        navigation.navigate('Playback', { video: { uri } })
     }
 
     const stopRecording = async () => {
-        setIsLoading(true)
-        console.log('in stopRecording')
         camera!!.stopRecording();
         setIsRecording(false)
     }
@@ -52,34 +41,33 @@ export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListB
 
     return (
         <>
-            {isLoading ? <Loading /> :
-                isFocused && <Camera style={styles.camera} type={type} ref={ref => setCamera(ref!!)}>
-                    <View style={styles.bottomRow}>
-                        <View style={styles.buttonContainer}>
-                            <TouchableOpacity
-                                style={styles.invisibleButton}>
-                                <Icon family='MaterialIcons' name='restore-from-trash' color='black' props={{ size: 35 }} />
-                            </TouchableOpacity>
-                        </View>
-                        <View style={styles.buttonContainer}>
-                            <TouchableOpacity
-                                style={styles.recordButton}
-                                onPress={isRecording ? stopRecording : startRecording}>
-                                {isRecording ? <StopRecordingIcon /> : <StartRecordingIcon />}
-                            </TouchableOpacity>
-                        </View>
-                        <View style={styles.buttonContainer}>
-                            <TouchableOpacity
-                                style={Object.assign({}, styles.flipButton, isRecording ? styles.invisibleButton : {})}
-                                onPress={() => {
-                                    setType(type === CameraType.back ? CameraType.front : CameraType.back);
-                                }}>
-                                <Icon family='MaterialIcons' name='flip-camera-ios' color='white' props={{ size: 35 }} />
-                            </TouchableOpacity>
-                        </View>
-
+            {isFocused && <Camera style={styles.camera} type={type} ref={ref => setCamera(ref!!)}>
+                <View style={styles.bottomRow}>
+                    <View style={styles.buttonContainer}>
+                        <TouchableOpacity
+                            style={styles.invisibleButton}>
+                            <Icon family='MaterialIcons' name='restore-from-trash' color='black' props={{ size: 35 }} />
+                        </TouchableOpacity>
                     </View>
-                </Camera>
+                    <View style={styles.buttonContainer}>
+                        <TouchableOpacity
+                            style={styles.recordButton}
+                            onPress={isRecording ? stopRecording : startRecording}>
+                            {isRecording ? <StopRecordingIcon /> : <StartRecordingIcon />}
+                        </TouchableOpacity>
+                    </View>
+                    <View style={styles.buttonContainer}>
+                        <TouchableOpacity
+                            style={Object.assign({}, styles.flipButton, isRecording ? styles.invisibleButton : {})}
+                            onPress={() => {
+                                setType(type === CameraType.back ? CameraType.front : CameraType.back);
+                            }}>
+                            <Icon family='MaterialIcons' name='flip-camera-ios' color='white' props={{ size: 35 }} />
+                        </TouchableOpacity>
+                    </View>
+
+                </View>
+            </Camera>
             }
         </>
     );
