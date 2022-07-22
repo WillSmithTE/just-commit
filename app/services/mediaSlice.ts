@@ -10,16 +10,6 @@ const initialState: MediaState = {
     medias: undefined,
 }
 
-export const getMediaThunk = createAsyncThunk(
-    'media/get',
-    async () => {
-        console.log(`about to get media in thunk`)
-        const response = await api.getRecordings()
-        console.log(`getMediaThunk (response=${response})`)
-        return response
-    }
-)
-
 export const mediaSlice = createSlice({
     name: 'media',
     initialState,
@@ -44,11 +34,6 @@ export const mediaSlice = createSlice({
                 state.medias!!.splice(index, 1)
             }
         },
-    },
-    extraReducers: (builder) => {
-        builder.addCase(getMediaThunk.fulfilled, (state, action) => {
-            state.medias = action.payload
-        })
     },
 })
 

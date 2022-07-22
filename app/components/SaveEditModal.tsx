@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Text, View, StyleSheet, Modal, TextInput } from 'react-native';
+import { Text, View, StyleSheet, TextInput } from 'react-native';
 import { useState } from 'react';
 import DatePicker from 'react-native-date-picker'
 import * as MediaLibrary from 'expo-media-library';
@@ -9,7 +9,7 @@ import { registerForNotificationsAsync } from './Notification';
 import { AtLeast, MyVideo } from '../types';
 import { useDispatch } from 'react-redux';
 import { upsertMedia } from '../services/mediaSlice';
-import { Button } from 'react-native-paper';
+import { Button, Modal } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import Icon from './Icon';
 
@@ -48,10 +48,11 @@ export const SaveEditModal = ({ isVisible, setVisible, video }: SaveEditModalPro
     }
 
     return <Modal
-        animationType="slide"
-        transparent={true}
+        // animationType="slide"
+        // transparent={true}
+        dismissable
         visible={isVisible}
-        onRequestClose={() => {
+        onDismiss={() => {
             setVisible(false);
         }}>
         {isLoading && <Loading />}

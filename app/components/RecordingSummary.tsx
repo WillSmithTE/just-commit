@@ -7,12 +7,13 @@ import { ORANGE_COLOUR } from '../constants';
 import { Audio } from 'expo-av';
 import { useDispatch } from 'react-redux';
 import { selectMedia } from '../services/selectedMediaSlice';
+import { useNavigation } from '@react-navigation/native';
 
 export const RecordingSummary = ({ media, }: { media: MyVideo }) => {
     const [moreOptionsModal, setMoreOptionsModal] = useState(false);
     const [sound, setSound] = React.useState<Audio.Sound | undefined>();
     const [isPlaying, setIsPlaying] = React.useState(false);
-    const dispatch = useDispatch()
+    const navigation = useNavigation();
 
     const finish = () => {
         setIsPlaying(false)
@@ -27,7 +28,7 @@ export const RecordingSummary = ({ media, }: { media: MyVideo }) => {
     }, [sound]);
 
     return (
-        <TouchableOpacity onPress={() => dispatch(selectMedia(media))}>
+        <TouchableOpacity onPress={() => navigation.navigate('Playback', { video: media })} >
             <View style={styles.container} >
                 <View >
                     <View>
@@ -42,7 +43,7 @@ export const RecordingSummary = ({ media, }: { media: MyVideo }) => {
                     </View>
                 </View>
             </View>
-        </TouchableOpacity>
+        </TouchableOpacity >
     );
 };
 

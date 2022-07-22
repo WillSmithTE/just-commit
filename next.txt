@@ -1,5 +1,7 @@
 - fix camera distortion (https://stackoverflow.com/questions/58634905/camera-preview-in-expo-is-distorted)
 DONE- move record stuff to tab on bottom
 - refactor to redux-persist, remove manual saves
-- use https://callstack.github.io/react-native-paper/getting-started.html for modal and buttons
-- use nav for playback on lib and home
+DONE- use https://callstack.github.io/react-native-paper/getting-started.html for modal and buttons
+TESTING- use nav for playback on lib and home
+- make save button more clear
+- hold for video record? was pip's intuition

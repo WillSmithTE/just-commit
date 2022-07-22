@@ -3,7 +3,6 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
 
-import usePreloadResources from './hooks/usePreloadResources';
 import useColorScheme from './hooks/useColorScheme';
 import Navigation from './navigation';
 import { persistor, store } from './services/reduxStore';
