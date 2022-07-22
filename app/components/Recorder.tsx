@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { Camera, CameraType } from 'expo-camera';
 import { NavigationProp, ParamListBase } from '@react-navigation/native';
 import { useIsFocused } from '@react-navigation/native';
+import * as Device from 'expo-device';
 
 export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListBase, string, any, any> }) => {
     const [isRecording, setIsRecording] = useState(false)
@@ -22,11 +23,16 @@ export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListB
     }, []);
 
     const startRecording = async () => {
-        setIsRecording(true)
-        const { uri } = await camera!!.recordAsync()
-        // setCamera(undefined)
-        console.log(`new recording (uri=${uri}`);
-        navigation.navigate('Playback', { video: { uri } })
+        if (Device.isDevice) {
+            setIsRecording(true)
+            const { uri } = await camera!!.recordAsync()
+            // setCamera(undefined)
+            console.log(`new recording (uri=${uri}`);
+            navigation.navigate('Playback', { video: { uri } })
+        } else {
+            console.log('emulator, playing dummy video')
+            navigation.navigate('Playback', {video: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4'})
+        }
     }
 
     const stopRecording = async () => {

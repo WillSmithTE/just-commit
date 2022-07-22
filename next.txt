@@ -2,3 +2,4 @@
 DONE- move record stuff to tab on bottom
 - refactor to redux-persist, remove manual saves
 - use https://callstack.github.io/react-native-paper/getting-started.html for modal and buttons
+- use nav for playback on lib and home

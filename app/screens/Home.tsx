@@ -34,8 +34,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'black',
     paddingLeft: 20,
     paddingRight: 20,
-    alignItems: 'center',
-
   },
   title: {
     fontSize: 40,
@@ -43,7 +41,7 @@ const styles = StyleSheet.create({
     color: 'white',
     paddingTop: 10,
     paddingLeft: 10,
-    marginRight: 'auto',
+    // marginRight: 'auto',
   },
   separator: {
     marginVertical: 30,
