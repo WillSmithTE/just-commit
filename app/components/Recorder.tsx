@@ -1,11 +1,13 @@
 import * as React from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Pressable, Text, Animated } from 'react-native';
 import Icon from './Icon';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Camera, CameraType } from 'expo-camera';
 import { NavigationProp, ParamListBase } from '@react-navigation/native';
 import { useIsFocused } from '@react-navigation/native';
 import * as Device from 'expo-device';
+import { AnimatedCircularProgress } from 'react-native-circular-progress';
+import { BLUE_COLOUR } from '../constants';
 
 export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListBase, string, any, any> }) => {
     const [isRecording, setIsRecording] = useState(false)
@@ -26,12 +28,11 @@ export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListB
         if (Device.isDevice) {
             setIsRecording(true)
             const { uri } = await camera!!.recordAsync()
-            // setCamera(undefined)
             console.log(`new recording (uri=${uri}`);
             navigation.navigate('Playback', { video: { uri } })
         } else {
             console.log('emulator, playing dummy video')
-            navigation.navigate('Playback', {video: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4'})
+            navigation.navigate('Playback', { video: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4' })
         }
     }
 
@@ -56,11 +57,7 @@ export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListB
                         </TouchableOpacity>
                     </View>
                     <View style={styles.buttonContainer}>
-                        <TouchableOpacity
-                            style={styles.recordButton}
-                            onPress={isRecording ? stopRecording : startRecording}>
-                            {isRecording ? <StopRecordingIcon /> : <StartRecordingIcon />}
-                        </TouchableOpacity>
+                        <StartRecordingIcon start={startRecording} stop={stopRecording} isRecording={isRecording} />
                     </View>
                     <View style={styles.buttonContainer}>
                         <TouchableOpacity
@@ -78,8 +75,71 @@ export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListB
     );
 }
 
-const StartRecordingIcon = () => <Icon family='MaterialCommunityIcons' name='record-circle' color='red' props={{ size: 150 }} />
+const maxCircleSize = 125
+const outerCircleSize = 90
+const innerCircleSize = 75
 
+const mode1 = {
+    key: 1,
+    backgroundColor: "#3d5875",
+    tintColor: '#00e0ff'
+}
+const mode2 = {
+    key: 2,
+    backgroundColor: "#00e0ff",
+    tintColor: '#3d5875'
+}
+
+const StartRecordingIcon = ({ isRecording, start, stop }: { isRecording: boolean, start: () => void, stop: () => void }) => {
+    const [mode, setMode] = useState(mode1)
+
+    return <>
+        {isRecording && <AnimatedCircularProgress
+            key={new Date().toString()}
+            size={maxCircleSize}
+            width={20}
+            duration={10 * 1000}
+            fill={100}
+            tintColor={mode.tintColor}
+            onAnimationComplete={() => setMode(mode === mode1 ? mode2 : mode1)}
+            backgroundColor={mode.backgroundColor}
+            style={{ transform: [{ rotate: '270deg' }] }}
+        />}
+        <View style={circleStyles.circleContainer}>
+            {!isRecording && <View style={circleStyles.outerCircle} />}
+            <Pressable onPressIn={start} onPressOut={stop}>
+                <View style={circleStyles.innerCircle} />
+            </Pressable>
+        </View>
+    </>
+}
+
+const circleStyles = StyleSheet.create({
+    circleContainer: {
+        alignSelf: 'center',
+    },
+    outerCircle: {
+        borderRadius: outerCircleSize / 2,
+        width: outerCircleSize,
+        height: outerCircleSize,
+        borderColor: 'white',
+        borderWidth: 3,
+        position: 'absolute',
+        bottom: (maxCircleSize - outerCircleSize) / 2,
+        alignSelf: 'center',
+    },
+    innerCircle: {
+        borderRadius: innerCircleSize / 2,
+        width: innerCircleSize,
+        height: innerCircleSize,
+        backgroundColor: 'white',
+        position: 'absolute',
+        bottom: (maxCircleSize - innerCircleSize) / 2,
+        alignSelf: 'center',
+    }
+});
+
+{/* <Icon family='MaterialCommunityIcons' name='circle' color='white' props={{ size: 80, style: {borderColor: 'white', borderWidth: 5, borderRadius: 40} }} /> */ }
 const StopRecordingIcon = () => <Icon family='MaterialCommunityIcons' name='stop-circle' color='red' props={{ size: 150 }} />
 
 const styles = StyleSheet.create({
@@ -100,6 +160,8 @@ const styles = StyleSheet.create({
     invisibleButton: {
         opacity: 0,
         height: 0,
+        marginRight: 12,
+        marginBottom: 12,
     },
     recordButton: {
         // marginLeft: 'auto',

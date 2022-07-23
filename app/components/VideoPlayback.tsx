@@ -13,25 +13,29 @@ import { useNavigation } from '@react-navigation/native';
 import { isDevice } from 'expo-device';
 
 type VideoPlaybackProps = RootStackScreenProps<'Playback'> & {
-    video: AtLeast<MyVideo, 'uri'>,
+    vide: AtLeast<MyVideo, 'uri'>,
 }
 // type VideoPlaybackProps = {
 //     video: AtLeast<MyVideo, 'uri'>,
 // }
 
-export const VideoPlayback = ({ route: { params: { video: selectedVideo } } }: VideoPlaybackProps) => {
-    // export const VideoPlayback = ({ video: selectedVideo }: VideoPlaybackProps) => {
+export const VideoPlayback = ({ route: { params: { video: selectedVideo, inEditMode } } }: VideoPlaybackProps) => {
     const playbackVideo = React.useRef<Video>(null);
     const [status, setStatus] = useState<AVPlaybackStatus | undefined>();
-    const [isSaveModalVisible, setSaveModalVisible] = useState(false)
+    const [isSaveModalVisible, setSaveModalVisible] = useState(inEditMode === true)
     const navigation = useNavigation();
+
+    React.useMemo(() => {
+        if (status?.isLoaded === true) {
+            playbackVideo.current!!.playAsync().catch(console.error)
+        }
+    }, [status?.isLoaded])
 
     React.useEffect(() => {
         if (!isDevice) {
             setSaveModalVisible(true)
         }
-    })
-    const dispatch = useDispatch()
+    }, [])
 
     const isNewVideo = selectedVideo.id === undefined
 
@@ -46,7 +50,7 @@ export const VideoPlayback = ({ route: { params: { video: selectedVideo } } }: V
                     style: 'cancel',
                 },
                 {
-                    text: 'Delete', onPress: () => {
+                    text: 'Discard', onPress: () => {
                         exit()
                     }
                 },
@@ -93,7 +97,7 @@ export const VideoPlayback = ({ route: { params: { video: selectedVideo } } }: V
             <TouchableOpacity
                 style={styles.closeButton}
                 onPress={pressExit}>
-                <Icon family='AntDesign' name='close' color='white' props={{ size: 35 }} />
+                <Icon family='MaterialCommunityIcons' name='chevron-left' color='white' props={{ size: 60 }} />
             </TouchableOpacity>
         </View>
         {
@@ -116,7 +120,7 @@ export const VideoPlayback = ({ route: { params: { video: selectedVideo } } }: V
                         <TouchableOpacity onPress={pressEdit} style={styles.tickButton}>
                             {isNewVideo ?
                                 <Icon family='Entypo' name='check' color='white' size={50} /> :
-                                <Icon family='Entypo' name='edit' color='white' size={50} />}
+                                <Icon family='MaterialCommunityIcons' name='pencil-box-outline' color='white' size={50} />}
                         </TouchableOpacity>
                     </View>
                 </> :

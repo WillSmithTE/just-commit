@@ -45,7 +45,7 @@ export const RecordingSummary = ({ media, }: { media: MyVideo }) => {
                     </View>
                 </View>
                 <View>
-                    <SummaryMenu open={() => setIsMenuVisible(true)} close={() => setIsMenuVisible(false)} isVisible={isMenuVisible} />
+                    <SummaryMenu media={media} open={() => setIsMenuVisible(true)} close={() => setIsMenuVisible(false)} isVisible={isMenuVisible} />
                 </View>
             </View>
         </TouchableOpacity >
@@ -56,16 +56,24 @@ type SummaryMenuProps = {
     open: () => void,
     close: () => void,
     isVisible: boolean,
+    media: MyVideo,
 }
 
-const SummaryMenu = ({ open, close, isVisible }: SummaryMenuProps) => {
+const SummaryMenu = ({ media, open, close, isVisible }: SummaryMenuProps) => {
+    const navigation = useNavigation()
+
+    const onEdit = () => {
+        close()
+        navigation.navigate('Playback', { video: media, inEditMode: true })
+    }
+
     return <>
         <Menu
             visible={isVisible}
             onDismiss={close}
             anchor={<IconButton icon="dots-vertical" onPress={open} color={BLUE_COLOUR}></IconButton>}>
-            <Menu.Item icon="pencil-box-outline" onPress={() => { }} title="Edit" />
-            <Menu.Item icon="delete" onPress={() => { }} title="Delete" />
+            <Menu.Item icon="pencil-box-outline" onPress={onEdit} title="Edit" />
+            {/* <Menu.Item icon="delete" onPress={() => { }} title="Delete" /> */}
         </Menu>
     </>
 }
