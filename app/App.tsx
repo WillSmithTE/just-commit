@@ -1,5 +1,4 @@
 import { StatusBar } from 'expo-status-bar';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Provider } from 'react-redux';
 
@@ -7,13 +6,12 @@ import useColorScheme from './hooks/useColorScheme';
 import Navigation from './navigation';
 import { persistor, store } from './services/reduxStore';
 import { RootSiblingParent } from 'react-native-root-siblings';
-import { Dimensions, Image, StyleSheet, View } from 'react-native';
-import React, { useCallback, useEffect, useState } from 'react';
+import { Dimensions, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
 import { PersistGate } from 'redux-persist/integration/react'
 import { Provider as PaperProvider } from 'react-native-paper';
 import { loadFonts } from './hooks/usePreloadResources';
 import * as SplashScreen from 'expo-splash-screen';
-import { Entypo } from '@expo/vector-icons';
 
 const queryClient = new QueryClient()
 SplashScreen.preventAutoHideAsync();

@@ -42,7 +42,7 @@ export default function Home({ navigation }: RootTabScreenProps<'Home'>) {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.container}>
-        <Text style={styles.title}>Coming up...</Text>
+        <Text style={styles.title}>Hej hej</Text>
         <RecordingsList timeUntil={oneWeekInFuture} />
       </View>
     </SafeAreaView>

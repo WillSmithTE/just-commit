@@ -4,8 +4,8 @@ import { useState } from 'react';
 import DatePicker from 'react-native-date-picker'
 import * as MediaLibrary from 'expo-media-library';
 import { Loading } from './Loading';
-// import * as Notifications from 'expo-notifications';
-// import { registerForNotificationsAsync } from './Notification';
+import * as Notifications from 'expo-notifications';
+import { registerForNotificationsAsync } from './Notification';
 import { AtLeast, MyVideo } from '../types';
 import { useDispatch } from 'react-redux';
 import { upsertMedia } from '../services/mediaSlice';
@@ -44,21 +44,22 @@ export const SaveEditModal = ({ isVisible, setVisible, video }: SaveEditModalPro
             dateToSave = now
         }
 
-        const [asset, _, notificationId] = await Promise.all([
+        const [asset, _,] = await Promise.all([
             MediaLibrary.createAssetAsync(video.uri),
             video.notificationId ? deleteOldNotification(video.notificationId) : Promise.resolve(),
-            dateToSave ? registerForNotification(dateToSave, title) : Promise.resolve(undefined)
         ])
         const uri = Platform.OS === 'ios' ?
             convertLocalIdentifierToAssetLibrary(asset.uri, 'mov') :
             asset.uri
-        dispatch(upsertMedia({
+        const media = {
             ...asset,
             notificationDate: dateToSave.getTime(),
-            notificationId,
             title,
             uri,
-        }))
+        }
+        let notificationId = undefined
+        if (media.notificationDate) notificationId = await registerForNotification(media)
+        dispatch(upsertMedia({ ...media, notificationId, }))
         setLoading(false)
         setVisible(false)
 
@@ -112,22 +113,21 @@ const deleteOldNotification = async (notificationId: string) => {
     // await Notifications.cancelScheduledNotificationAsync(notificationId);
 }
 
-const registerForNotification = async (notificationDate: Date, title?: string) => {
-    console.debug(`registering for notification (date=${notificationDate}`)
-    // await registerForNotificationsAsync()
-    return schedulePushNotification(notificationDate, title)
+const registerForNotification = async (media: MyVideo) => {
+    console.debug(`registering for notification (date=${media.notificationDate}`)
+    await registerForNotificationsAsync()
+    return schedulePushNotification(media)
 }
 
-async function schedulePushNotification(date: Date, title?: string): Promise<string> {
-    // return await Notifications.scheduleNotificationAsync({
-    //     content: {
-    //         title: title ?? "You've been reminded!",
-    //         body: 'Go on, watch your vid now. You got this',
-    //         data: { data: 'goes here' },
-    //     },
-    //     trigger: { date },
-    // });
-    return Promise.resolve('')
+async function schedulePushNotification(media: MyVideo): Promise<string> {
+    return media.notificationDate ? await Notifications.scheduleNotificationAsync({
+        content: {
+            title: media.title ? `Reminder: ${media.title}` : "You've been reminded!",
+            body: 'Come on, watch your vid now. You got this 💃 🕺',
+            data: { media },
+        },
+        trigger: { date: media.notificationDate },
+    }) : Promise.reject()
 }
 
 export const convertLocalIdentifierToAssetLibrary = (uri: string, ext: string) => {

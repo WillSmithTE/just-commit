@@ -4,7 +4,7 @@
  *
  */
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { NavigationContainer, DarkTheme } from '@react-navigation/native';
+import { NavigationContainer, DarkTheme, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as React from 'react';
 import { ColorSchemeName } from 'react-native';
@@ -12,12 +12,13 @@ import { ColorSchemeName } from 'react-native';
 import useColorScheme from '../hooks/useColorScheme';
 import NotFoundScreen from '../screens/NotFoundScreen';
 import RecordScreen from '../screens/Record';
-import { RootStackParamList, RootTabParamList, RootTabScreenProps } from '../types';
+import { MyVideo, RootStackParamList, RootTabParamList, RootTabScreenProps } from '../types';
 import Icon, { IC } from '../components/Icon';
 import Home from '../screens/Home';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { BLUE_COLOUR } from '../constants';
 import { VideoPlayback } from '../components/VideoPlayback';
+import { useLastNotificationResponse, DEFAULT_ACTION_IDENTIFIER } from 'expo-notifications';
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
   return (
@@ -35,6 +36,20 @@ export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeNa
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function RootNavigator() {
+  const lastNotificationResponse = useLastNotificationResponse();
+  const navigation = useNavigation()
+
+  React.useEffect(() => {
+    if (
+      lastNotificationResponse &&
+      lastNotificationResponse.notification.request.content.data.media &&
+      lastNotificationResponse.actionIdentifier === DEFAULT_ACTION_IDENTIFIER
+    ) {
+      navigation.navigate('Playback', { video: lastNotificationResponse.notification.request.content.data.media as MyVideo })
+    }
+  }, [lastNotificationResponse]);
+
+
   return (
     <Stack.Navigator>
       <Stack.Screen name="Root" component={BottomTabNavigator} options={{ headerShown: false }} />
@@ -93,5 +108,5 @@ function TabBarIcon(props: {
   color: string;
   family?: IC['family'];
 }) {
-  return <Icon family={props.family} props={{ size: 30, style: { marginBottom: 0, paddingTop: 5}, ...props }} color={props.color} />;
+  return <Icon family={props.family} props={{ size: 30, style: { marginBottom: 0, paddingTop: 5 }, ...props }} color={props.color} />;
 }

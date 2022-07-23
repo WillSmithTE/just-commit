@@ -28,8 +28,12 @@ export const mediaSlice = createSlice({
             }
         },
         deleteMedia: (state, action: PayloadAction<string>) => {
-            const index = state?.medias?.findIndex(({ id }) => action.payload === id)
-            if (index === -1 || !index) {
+            if (state?.medias === undefined) {
+                console.error(`tried to delete but medias was undefined`)
+                return
+            }
+            const index = state.medias.findIndex(({ id }) => action.payload === id)
+            if (index === -1) {
                 console.error(`couldn't find song to delete (id=${action.payload})`)
             } else {
                 state.medias!!.splice(index, 1)

@@ -13,6 +13,7 @@ import { useNavigation } from '@react-navigation/native';
 import { isDevice } from 'expo-device';
 import { Button, IconButton, TextInput, } from 'react-native-paper';
 import { BLUE_COLOUR } from '../constants';
+import { deleteMedia } from '../services/mediaSlice';
 
 type VideoPlaybackProps = RootStackScreenProps<'Playback'> & {
     vide: AtLeast<MyVideo, 'uri'>,
@@ -43,12 +44,14 @@ export const VideoPlayback = ({ route: { params: { video: selectedVideo, inEditM
         }
     }, [])
 
+    const dispatch = useDispatch()
     const isNewVideo = selectedVideo.id === undefined
-
     const exit = () => navigation.goBack()
 
-    const pressExit = () => {
+    const deleteVideo = () => {
         if (isNewVideo) {
+            console.error('shouldnt be here')
+        } else {
             Alert.alert('Are you sure?', undefined, [
                 {
                     text: 'Cancel',
@@ -56,37 +59,23 @@ export const VideoPlayback = ({ route: { params: { video: selectedVideo, inEditM
                     style: 'cancel',
                 },
                 {
-                    text: 'Discard', onPress: () => {
+                    text: isNewVideo ? 'Discard' : 'Delete', onPress: () => {
+                        dispatch(deleteMedia(selectedVideo.id!!))
                         exit()
                     }
                 },
             ])
-        } else {
-            exit()
         }
+    }
+    const pressExit = () => {
+        if (isNewVideo) {
+            deleteVideo()
+        } else
+            exit()
     }
 
     const pressEdit = () => {
         setSaveModalVisible(true)
-    }
-
-    const deleteVideo = () => {
-
-    }
-
-    const pressTrash = () => {
-        if (isNewVideo) {
-            Alert.alert('Are you sure?', undefined, [
-                {
-                    text: 'Cancel',
-                    onPress: () => { },
-                    style: 'cancel',
-                },
-                {
-                    text: 'Delete', onPress: deleteVideo
-                },
-            ])
-        }
     }
 
     return <>
@@ -110,7 +99,7 @@ export const VideoPlayback = ({ route: { params: { video: selectedVideo, inEditM
             status?.isLoaded ?
                 <>
                     <View style={styles.bottomRow}>
-                        <TouchableOpacity onPress={pressTrash} style={isNewVideo ? styles.invisibleButton : styles.trashButton}>
+                        <TouchableOpacity onPress={deleteVideo} style={isNewVideo ? styles.invisibleButton : styles.trashButton}>
                             <Icon family='Entypo' name='trash' color='white' size={70} />
                         </TouchableOpacity>
                         <TouchableOpacity onPress={() =>
