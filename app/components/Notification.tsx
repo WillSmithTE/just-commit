@@ -10,8 +10,7 @@
 //     }),
 // });
 
-export async function registerForNotificationsAsync() {
-}
+// export async function registerForNotificationsAsync() {
 //     if (Device.isDevice) {
 //         const { status: existingStatus } = await Notifications.getPermissionsAsync();
 //         let finalStatus = existingStatus;

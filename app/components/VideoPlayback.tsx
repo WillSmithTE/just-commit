@@ -10,21 +10,27 @@ import { useDispatch, useSelector } from 'react-redux';
 import { clearSelectedMedia } from '../services/selectedMediaSlice';
 import { RootState } from '../services/reduxStore';
 import { useNavigation } from '@react-navigation/native';
+import { isDevice } from 'expo-device';
 
 type VideoPlaybackProps = RootStackScreenProps<'Playback'> & {
-video: AtLeast<MyVideo, 'uri'>,
+    video: AtLeast<MyVideo, 'uri'>,
 }
 // type VideoPlaybackProps = {
 //     video: AtLeast<MyVideo, 'uri'>,
 // }
 
 export const VideoPlayback = ({ route: { params: { video: selectedVideo } } }: VideoPlaybackProps) => {
-// export const VideoPlayback = ({ video: selectedVideo }: VideoPlaybackProps) => {
+    // export const VideoPlayback = ({ video: selectedVideo }: VideoPlaybackProps) => {
     const playbackVideo = React.useRef<Video>(null);
     const [status, setStatus] = useState<AVPlaybackStatus | undefined>();
     const [isSaveModalVisible, setSaveModalVisible] = useState(false)
     const navigation = useNavigation();
 
+    React.useEffect(() => {
+        if (!isDevice) {
+            setSaveModalVisible(true)
+        }
+    })
     const dispatch = useDispatch()
 
     const isNewVideo = selectedVideo.id === undefined
@@ -112,11 +118,11 @@ export const VideoPlayback = ({ route: { params: { video: selectedVideo } } }: V
                                 <Icon family='Entypo' name='check' color='white' size={50} /> :
                                 <Icon family='Entypo' name='edit' color='white' size={50} />}
                         </TouchableOpacity>
-                        <SaveEditModal isVisible={isSaveModalVisible} setVisible={setSaveModalVisible} video={selectedVideo!!} />
                     </View>
                 </> :
                 <Loading />
         }
+        <SaveEditModal isVisible={isSaveModalVisible} setVisible={setSaveModalVisible} video={selectedVideo!!} />
     </>
 }
 

@@ -1,15 +1,15 @@
 import * as React from 'react';
-import { Text, View, StyleSheet, TextInput } from 'react-native';
+import { Text, View, StyleSheet } from 'react-native';
 import { useState } from 'react';
 import DatePicker from 'react-native-date-picker'
 import * as MediaLibrary from 'expo-media-library';
 import { Loading } from './Loading';
 // import * as Notifications from 'expo-notifications';
-import { registerForNotificationsAsync } from './Notification';
+// import { registerForNotificationsAsync } from './Notification';
 import { AtLeast, MyVideo } from '../types';
 import { useDispatch } from 'react-redux';
 import { upsertMedia } from '../services/mediaSlice';
-import { Button, Modal } from 'react-native-paper';
+import { Button, Modal, TextInput, } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import Icon from './Icon';
 
@@ -32,13 +32,16 @@ export const SaveEditModal = ({ isVisible, setVisible, video }: SaveEditModalPro
         setLoading(true)
         await requestPermission()
         if (!permissionsStatus?.granted) {
-            console.error(`failed to get permissions (permissionState=${permissionsStatus}`)
+            console.error(`failed to get permissions (permissionStatus=${JSON.stringify(permissionsStatus)}`)
             return
         }
+        const now = new Date()
+        now.setSeconds(now.getSeconds() + 20)
+        setDate(now)
         const [asset, _, notificationId] = await Promise.all([
             MediaLibrary.createAssetAsync(video.uri),
             video.notificationId ? deleteOldNotification(video.notificationId) : Promise.resolve(),
-            date ? registerForNotification(date) : Promise.resolve(undefined)
+            date ? registerForNotification(date, title) : Promise.resolve(undefined)
         ])
         dispatch(upsertMedia({ ...asset, notificationDate: date, notificationId, title }))
         setLoading(false)
@@ -54,65 +57,67 @@ export const SaveEditModal = ({ isVisible, setVisible, video }: SaveEditModalPro
         visible={isVisible}
         onDismiss={() => {
             setVisible(false);
-        }}>
+        }}
+        style={styles.modal}
+        contentContainerStyle={styles.modalView}>
+
         {isLoading && <Loading />}
-        <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-                <Text style={{ ...styles.titleLabel }}>Title (optional)</Text>
-                <TextInput style={styles.titleTextInput} value={title} onChangeText={setTitle} autoFocus />
-                <View style={styles.notificationRow}>
-                    <Button mode='outlined' icon='bell-outline' onPress={() => {
-                        setDate(new Date())
-                        setDateOpen(true)
-                    }}>{date ? date.toString() : 'Add notification'}</Button>
-                    {date && <Icon family='AntDesign' name='close' color='gray' props={{ size: 35 }} />}
-                </View>
-                {date && <DatePicker
-                    modal
-                    open={dateOpen}
-                    date={date}
-                    onConfirm={(date) => {
-                        setDateOpen(false)
-                        setDate(date)
-                    }}
-                    onCancel={() => setDateOpen(false)}
-                />}
-                {date && <DatePicker date={date} onDateChange={setDate} />}
-                <View style={styles.buttonContainer}>
-                    <Button style={styles.button} color={'blue'} mode='contained' onPress={onPressSave}>Save</Button>
-                    <Button style={styles.button} color={'gray'} mode='outlined' onPress={() => setVisible(false)}>Cancel</Button>
-                </View>
-            </View>
+        <TextInput label={'Title (optional)'} style={styles.titleTextInput} value={title} onChangeText={setTitle} autoFocus autoComplete={false} />
+        <View style={styles.notificationRow}>
+            <Button mode='outlined' icon='bell-outline' style={styles.notificationButton} onPress={() => {
+                setDate(new Date())
+                setDateOpen(true)
+            }}>{date ? date.toString() : 'Add notification'}</Button>
+            {date && <Icon family='AntDesign' name='close' color='gray' props={{ size: 35 }} />}
+        </View>
+        {date && <DatePicker
+            modal
+            open={dateOpen}
+            date={date}
+            onConfirm={(date) => {
+                setDateOpen(false)
+                setDate(date)
+            }}
+            onCancel={() => setDateOpen(false)}
+        />}
+        <View style={styles.buttonContainer}>
+            <Button style={styles.button} color={'blue'} mode='contained' onPress={onPressSave}>Save</Button>
+            <Button style={styles.button} color={'gray'} mode='outlined' onPress={() => setVisible(false)}>Cancel</Button>
         </View>
     </Modal>
 
-}
-
-async function schedulePushNotification(date: Date): Promise<string> {
-    // return await Notifications.scheduleNotificationAsync({
-    //     content: {
-    //         title: "You've got mail! 📬",
-    //         body: 'Here is the notification body',
-    //         data: { data: 'goes here' },
-    //     },
-    //     trigger: { seconds: 2 },
-    // });
-    return Promise.resolve('')
 }
 
 const deleteOldNotification = async (notificationId: string) => {
     // await Notifications.cancelScheduledNotificationAsync(notificationId);
 }
 
-const registerForNotification = async (notificationDate?: Date) => {
+const registerForNotification = async (notificationDate?: Date, title?: string) => {
     if (notificationDate) {
-        await registerForNotificationsAsync()
-        return schedulePushNotification(notificationDate)
+        console.debug(`registering for notification (date=${notificationDate}`)
+        // await registerForNotificationsAsync()
+        return schedulePushNotification(notificationDate, title)
     }
-    return Promise.resolve(undefined)
+    // return Promise.resolve(undefined)
+}
+
+async function schedulePushNotification(date: Date, title?: string): Promise<string> {
+    // return await Notifications.scheduleNotificationAsync({
+    //     content: {
+    //         title: title ?? "You've been reminded!",
+    //         body: 'Go on, watch your vid now. You got this',
+    //         data: { data: 'goes here' },
+    //     },
+    //     trigger: { date },
+    // });
+    return Promise.resolve('')
 }
 
 const styles = StyleSheet.create({
+    modal: {
+        paddingHorizontal: 20,
+        paddingBottom: 200,
+    },
     centeredView: {
         flex: 1,
         justifyContent: 'center',
@@ -122,18 +127,11 @@ const styles = StyleSheet.create({
         opacity: 0.8,
         backgroundColor: 'white',
         borderRadius: 20,
-        paddingVertical: 10,
+        paddingTop: 20,
+        paddingBottom: 10,
         paddingHorizontal: 30,
         alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.5,
-        shadowRadius: 4,
-        elevation: 5,
-        minWidth: 200,
+        // minWidth: 200,
     },
     button: {
         borderRadius: 5,
@@ -171,6 +169,7 @@ const styles = StyleSheet.create({
         textAlign: 'left',
         fontSize: 20,
         alignSelf: 'stretch',
+        borderColor: 'gray',
         // backgroundColor: '#AF9696'
     },
     notificationRow: {
@@ -183,4 +182,7 @@ const styles = StyleSheet.create({
     buttonContainer: {
         alignSelf: 'stretch'
     },
+    notificationButton: {
+        flex: 1,
+    }
 })  

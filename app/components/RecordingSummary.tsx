@@ -1,15 +1,12 @@
-import React, { useEffect, useState, memo } from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import Icon from './Icon';
+import React, { useState } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native';
 import { GetVideoHeading, MyVideo } from '../types';
-import millisToMin from '../services/millisToMin';
-import { ORANGE_COLOUR } from '../constants';
+import { secondsToMin } from '../services/timeUtil';
 import { Audio } from 'expo-av';
-import { useDispatch } from 'react-redux';
-import { selectMedia } from '../services/selectedMediaSlice';
 import { useNavigation } from '@react-navigation/native';
 
 export const RecordingSummary = ({ media, }: { media: MyVideo }) => {
+    console.log({ media })
     const [moreOptionsModal, setMoreOptionsModal] = useState(false);
     const [sound, setSound] = React.useState<Audio.Sound | undefined>();
     const [isPlaying, setIsPlaying] = React.useState(false);
@@ -30,17 +27,18 @@ export const RecordingSummary = ({ media, }: { media: MyVideo }) => {
     return (
         <TouchableOpacity onPress={() => navigation.navigate('Playback', { video: media })} >
             <View style={styles.container} >
-                <View >
-                    <View>
-                        <Text style={styles.title}>
-                            {GetVideoHeading(media)}
-                        </Text>
-                    </View>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                        <Text style={styles.duration}>{media.notificationDate}</Text>
-                        <Text style={styles.duration}>{millisToMin(media.duration)}</Text>
-                        {/* <DeleteButton song={song} /> */}
-                    </View>
+                <View style={styles.imageContainer}>
+                    <Image source={willsmithImageSource} style={styles.image} />
+                </View>
+                <View>
+                    <Text style={styles.title}>
+                        {GetVideoHeading(media)}
+                    </Text>
+                </View>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <Text style={styles.duration}>{media.notificationDate}</Text>
+                    <Text style={styles.duration}>{secondsToMin(media.duration)}</Text>
+                    {/* <DeleteButton song={song} /> */}
                 </View>
             </View>
         </TouchableOpacity >
@@ -68,5 +66,15 @@ const styles = StyleSheet.create({
     },
     playBtn: {
         paddingRight: 20
+    },
+    image: {
+        width: 30,
+        height: 30, 
+    },
+    imageContainer: {
+        paddingRight: 20,
     }
 });
+
+const willsmithImageSource = require('../assets/images/willsmith.png');
+

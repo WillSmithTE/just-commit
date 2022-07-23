@@ -64,14 +64,6 @@ const BottomTab = createBottomTabNavigator<RootTabParamList>();
 
 function BottomTabNavigator() {
   const colorScheme = useColorScheme();
-  const selectedVideo = useSelector((state: RootState) => state.selectedMedia.selectedMedia)
-
-  const withPlayback = (component: React.ComponentType<any>) => {
-    // return selectedVideo ?
-    //   (props: {}) => <VideoPlayback video={selectedVideo} {...props} /> :
-    //   component
-    return component
-  }
 
   return (
     <SafeAreaProvider>
@@ -84,25 +76,25 @@ function BottomTabNavigator() {
       >
         <BottomTab.Screen
           name="Home"
-          component={withPlayback(Home)}
+          component={Home}
           options={({ navigation }: RootTabScreenProps<'Home'>) => ({
             tabBarIcon: ({ color }) => <TabBarIcon name="home" family='Ionicons' color={color} />,
           })}
         />
         <BottomTab.Screen
           name="Record"
-          component={withPlayback(RecordScreen)}
+          component={RecordScreen}
           options={({ navigation }: RootTabScreenProps<'Record'>) => ({
             tabBarIcon: ({ color }) => <TabBarIcon name="record-circle" family='MaterialCommunityIcons' color={color} />,
           })}
         />
-        <BottomTab.Screen
+        {/* <BottomTab.Screen
           name="Library"
-          component={withPlayback(Library)}
+          component={Library}
           options={({ navigation }: RootTabScreenProps<'Library'>) => ({
             tabBarIcon: ({ color }) => <TabBarIcon name="library" family='Ionicons' color={color} />,
           })}
-        />
+        /> */}
       </BottomTab.Navigator>
     </SafeAreaProvider>
   );

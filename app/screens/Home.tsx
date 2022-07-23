@@ -1,24 +1,45 @@
-import React from 'react'
-import { StyleSheet, TouchableOpacity } from 'react-native';
+import { isDevice } from 'expo-device';
+import React, { useEffect } from 'react'
+import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
-import EditScreenInfo from '../components/EditScreenInfo';
-import Icon from '../components/Icon';
-import { Recorder } from '../components/Recorder';
 import { RecordingsList } from '../components/RecordingsList';
 import { Text, View } from '../components/Themed';
-import { VideoPlayback } from '../components/VideoPlayback';
-import { RootState } from '../services/reduxStore';
+import { upsertMedia } from '../services/mediaSlice';
 import { RootTabScreenProps } from '../types'
 
 export default function Home({ navigation }: RootTabScreenProps<'Home'>) {
   const oneWeekInFuture = new Date(new Date().getDate() + 7)
-  const selectedVideo = useSelector((state: RootState) => state.selectedMedia.selectedMedia)
+  const dispatch = useDispatch()
 
+  useEffect(() => {
+    if (!isDevice) {
+      dispatch(upsertMedia({
+        creationTime: 1,
+        duration: 20,
+        filename: 'herpderp.mp4',
+        height: 20,
+        id: new Date().toString(),
+        mediaType: 'video',
+        modificationTime: 20,
+        uri: '1234',
+        width: 10,
+      }))
+      dispatch(upsertMedia({
+        creationTime: 1,
+        duration: 20,
+        filename: 'herpderp.mp4',
+        height: 20,
+        id: new Date().toString(),
+        mediaType: 'video',
+        modificationTime: 20,
+        uri: '1234',
+        width: 10,
+      }))
+    }
+  })
   return (
-    // selectedVideo ?
-    //   <VideoPlayback video={selectedVideo} /> :
     <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.container}>
         <Text style={styles.title}>Coming up...</Text>
