@@ -2,7 +2,7 @@ import * as React from 'react';
 import { View, StyleSheet, TouchableOpacity, Pressable, Text, Animated } from 'react-native';
 import Icon from './Icon';
 import { useEffect, useRef, useState } from 'react';
-import { Camera, CameraType } from 'expo-camera';
+import { Camera, CameraType, VideoCodec } from 'expo-camera';
 import { NavigationProp, ParamListBase } from '@react-navigation/native';
 import { useIsFocused } from '@react-navigation/native';
 import * as Device from 'expo-device';
@@ -27,9 +27,9 @@ export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListB
     const startRecording = async () => {
         if (Device.isDevice) {
             setIsRecording(true)
-            const { uri } = await camera!!.recordAsync()
-            console.log(`new recording (uri=${uri}`);
-            navigation.navigate('Playback', { video: { uri } })
+            const recording = await camera!!.recordAsync({codec: VideoCodec.JPEG})
+            console.log(`new recording (recording=${JSON.stringify(recording, null, 2)}`);
+            navigation.navigate('Playback', { video: { uri: recording.uri } })
         } else {
             console.log('emulator, playing dummy video')
             navigation.navigate('Playback', { video: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4' })

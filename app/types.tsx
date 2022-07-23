@@ -42,7 +42,7 @@ export type RootTabScreenProps<Screen extends keyof RootTabParamList> = Composit
 
 export type MyVideo = MediaLibrary.Asset & {
   title?: string,
-  notificationDate?: Date,
+  notificationDate?: number,
   notificationId?: string,
   isNotificationAcknowledged?: boolean,
 }

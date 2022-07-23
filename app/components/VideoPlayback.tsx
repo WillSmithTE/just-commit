@@ -2,7 +2,7 @@ import * as React from 'react';
 import { View, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { AVPlaybackStatus, Video } from 'expo-av';
 import Icon from './Icon';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NavigationProp, ParamListBase } from '@react-navigation/native';
 import { SaveEditModal } from './SaveEditModal';
 import { AtLeast, MyVideo, RootStackScreenProps, RootTabScreenProps } from '../types';
@@ -11,6 +11,8 @@ import { clearSelectedMedia } from '../services/selectedMediaSlice';
 import { RootState } from '../services/reduxStore';
 import { useNavigation } from '@react-navigation/native';
 import { isDevice } from 'expo-device';
+import { Button, IconButton, TextInput, } from 'react-native-paper';
+import { BLUE_COLOUR } from '../constants';
 
 type VideoPlaybackProps = RootStackScreenProps<'Playback'> & {
     vide: AtLeast<MyVideo, 'uri'>,
@@ -31,7 +33,11 @@ export const VideoPlayback = ({ route: { params: { video: selectedVideo, inEditM
         }
     }, [status?.isLoaded])
 
-    React.useEffect(() => {
+    useEffect(() => {
+        console.log(`playbackStatus=${JSON.stringify(status, null, 2)}`)
+    }, [status])
+
+    useEffect(() => {
         if (!isDevice) {
             setSaveModalVisible(true)
         }
@@ -105,7 +111,7 @@ export const VideoPlayback = ({ route: { params: { video: selectedVideo, inEditM
                 <>
                     <View style={styles.bottomRow}>
                         <TouchableOpacity onPress={pressTrash} style={isNewVideo ? styles.invisibleButton : styles.trashButton}>
-                            <Icon family='Entypo' name='trash' color='white' size={50} />
+                            <Icon family='Entypo' name='trash' color='white' size={70} />
                         </TouchableOpacity>
                         <TouchableOpacity onPress={() =>
                             status?.isPlaying ?
@@ -119,8 +125,8 @@ export const VideoPlayback = ({ route: { params: { video: selectedVideo, inEditM
                         </TouchableOpacity>
                         <TouchableOpacity onPress={pressEdit} style={styles.tickButton}>
                             {isNewVideo ?
-                                <Icon family='Entypo' name='check' color='white' size={50} /> :
-                                <Icon family='MaterialCommunityIcons' name='pencil-box-outline' color='white' size={50} />}
+                                <Icon family='MaterialCommunityIcons' name='content-save' color='white' size={70} /> :
+                                <Icon family='MaterialCommunityIcons' name='pencil-box-outline' color='white' size={70} />}
                         </TouchableOpacity>
                     </View>
                 </> :
@@ -146,27 +152,14 @@ const styles = StyleSheet.create({
         margin: 20,
     },
     closeButton: {
-        // marginBottom: 'auto',
-        // marginRight: 'auto',
         zIndex: 10,
         elevation: 50,
-        // position: 'absolute',
     },
     invisibleButton: {
         opacity: 0,
         height: 0,
-        marginLeft: 24,
+        marginLeft: 36,
         marginBottom: 12,
-    },
-    recordButton: {
-        // marginLeft: 'auto',
-        // marginTop: 'auto'
-    },
-    flipButton: {
-        // marginLeft: 'auto',
-        marginRight: 12,
-        marginBottom: 12,
-        // marginTop: 'auto',
     },
     bottomRow: {
         justifyContent: 'space-between',
@@ -186,11 +179,11 @@ const styles = StyleSheet.create({
         top: 0,
     },
     tickButton: {
-        marginRight: 24,
-        marginBottom: 12,
+        marginRight: 36,
+        marginBottom: 24,
     },
     trashButton: {
-        marginLeft: 24,
+        marginLeft: 36,
         marginBottom: 12,
     },
     centeredView: {

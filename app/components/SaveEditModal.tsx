@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Text, View, StyleSheet } from 'react-native';
+import { Text, View, StyleSheet, Platform } from 'react-native';
 import { useState } from 'react';
 import DatePicker from 'react-native-date-picker'
 import * as MediaLibrary from 'expo-media-library';
@@ -9,7 +9,7 @@ import { Loading } from './Loading';
 import { AtLeast, MyVideo } from '../types';
 import { useDispatch } from 'react-redux';
 import { upsertMedia } from '../services/mediaSlice';
-import { Button, Modal, TextInput, } from 'react-native-paper';
+import { Button, IconButton, Modal, TextInput, } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import Icon from './Icon';
 
@@ -21,7 +21,7 @@ type SaveEditModalProps = {
 
 export const SaveEditModal = ({ isVisible, setVisible, video }: SaveEditModalProps) => {
     const [title, setTitle] = useState(video.title || '')
-    const [date, setDate] = useState<Date | undefined>(video.notificationDate)
+    const [date, setDate] = useState<Date | undefined>(video.notificationDate ? new Date(video.notificationDate) : undefined)
     const [dateOpen, setDateOpen] = useState(false)
     const [permissionsStatus, requestPermission] = MediaLibrary.usePermissions();
     const [isLoading, setLoading] = useState(false)
@@ -30,20 +30,33 @@ export const SaveEditModal = ({ isVisible, setVisible, video }: SaveEditModalPro
 
     const onPressSave = async () => {
         setLoading(true)
-        await requestPermission()
-        if (!permissionsStatus?.granted) {
+        const permissionsresponse = await requestPermission()
+        if (!permissionsresponse?.granted) {
             console.error(`failed to get permissions (permissionStatus=${JSON.stringify(permissionsStatus)}`)
+            setLoading(false)
             return
         }
-        const now = new Date()
-        now.setSeconds(now.getSeconds() + 20)
-        setDate(now)
+        let dateToSave = undefined
+        if (date) dateToSave = date
+        else {
+            const now = new Date()
+            now.setSeconds(now.getSeconds() + 20)
+            dateToSave = now
+        }
+
         const [asset, _, notificationId] = await Promise.all([
             MediaLibrary.createAssetAsync(video.uri),
             video.notificationId ? deleteOldNotification(video.notificationId) : Promise.resolve(),
-            date ? registerForNotification(date, title) : Promise.resolve(undefined)
+            dateToSave ? registerForNotification(dateToSave, title) : Promise.resolve(undefined)
         ])
-        dispatch(upsertMedia({ ...asset, notificationDate: date, notificationId, title }))
+        const uri = Platform.OS === 'ios' ? `${asset.uri}.mov` : asset.uri
+        dispatch(upsertMedia({
+            ...asset,
+            notificationDate: dateToSave.getTime(),
+            notificationId,
+            title,
+            uri,
+        }))
         setLoading(false)
         setVisible(false)
 
@@ -51,8 +64,6 @@ export const SaveEditModal = ({ isVisible, setVisible, video }: SaveEditModalPro
     }
 
     return <Modal
-        // animationType="slide"
-        // transparent={true}
         dismissable
         visible={isVisible}
         onDismiss={() => {
@@ -62,13 +73,20 @@ export const SaveEditModal = ({ isVisible, setVisible, video }: SaveEditModalPro
         contentContainerStyle={styles.modalView}>
 
         {isLoading && <Loading />}
-        <TextInput label={'Title (optional)'} style={styles.titleTextInput} value={title} onChangeText={setTitle} autoFocus autoComplete={false} />
+        <TextInput underlineColor='purple' mode='flat' label={'Title (optional)'}
+            style={styles.titleTextInput} value={title} onChangeText={setTitle} autoComplete='off'
+            theme={{
+                colors: {
+                    placeholder: 'purple', text: 'black', primary: 'purple',
+                    background: '#003489'
+                }
+            }} />
         <View style={styles.notificationRow}>
             <Button mode='outlined' icon='bell-outline' style={styles.notificationButton} onPress={() => {
-                setDate(new Date())
+                if (date === undefined) setDate(new Date())
                 setDateOpen(true)
-            }}>{date ? date.toString() : 'Add notification'}</Button>
-            {date && <Icon family='AntDesign' name='close' color='gray' props={{ size: 35 }} />}
+            }}>{date ? date.toLocaleString() : 'Add notification'}</Button>
+            {date && <IconButton icon="close" size={35} onPress={() => setDate(undefined)} />}
         </View>
         {date && <DatePicker
             modal
@@ -92,13 +110,10 @@ const deleteOldNotification = async (notificationId: string) => {
     // await Notifications.cancelScheduledNotificationAsync(notificationId);
 }
 
-const registerForNotification = async (notificationDate?: Date, title?: string) => {
-    if (notificationDate) {
-        console.debug(`registering for notification (date=${notificationDate}`)
-        // await registerForNotificationsAsync()
-        return schedulePushNotification(notificationDate, title)
-    }
-    // return Promise.resolve(undefined)
+const registerForNotification = async (notificationDate: Date, title?: string) => {
+    console.debug(`registering for notification (date=${notificationDate}`)
+    // await registerForNotificationsAsync()
+    return schedulePushNotification(notificationDate, title)
 }
 
 async function schedulePushNotification(date: Date, title?: string): Promise<string> {
@@ -169,8 +184,7 @@ const styles = StyleSheet.create({
         textAlign: 'left',
         fontSize: 20,
         alignSelf: 'stretch',
-        borderColor: 'gray',
-        // backgroundColor: '#AF9696'
+        backgroundColor: '#f9f9f9',
     },
     notificationRow: {
         flexDirection: 'row',

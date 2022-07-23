@@ -7,14 +7,42 @@ import useColorScheme from './hooks/useColorScheme';
 import Navigation from './navigation';
 import { persistor, store } from './services/reduxStore';
 import { RootSiblingParent } from 'react-native-root-siblings';
-import { Dimensions, Image, StyleSheet } from 'react-native';
-import React from 'react';
+import { Dimensions, Image, StyleSheet, View } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
 import { PersistGate } from 'redux-persist/integration/react'
 import { Provider as PaperProvider } from 'react-native-paper';
+import { loadFonts } from './hooks/usePreloadResources';
+import * as SplashScreen from 'expo-splash-screen';
+import { Entypo } from '@expo/vector-icons';
 
 const queryClient = new QueryClient()
+SplashScreen.preventAutoHideAsync();
 
 export default function App() {
+  const [appIsReady, setAppIsReady] = useState(false);
+
+  useEffect(() => {
+    async function prepare() {
+      try {
+        await loadFonts()
+      } catch (e) {
+        console.warn(e);
+      } finally {
+        setAppIsReady(true);
+      }
+    }
+
+    prepare();
+  }, []);
+
+  useEffect(() => {
+    SplashScreen.hideAsync()
+  }, [appIsReady])
+
+  if (!appIsReady) {
+    return null;
+  }
+
   return (
     <RootSiblingParent>
       <Provider store={store}>
@@ -29,7 +57,6 @@ export default function App() {
 }
 
 const AppInternals = () => {
-  // const isLoadingComplete = usePreloadResources();
   const colorScheme = useColorScheme();
 
   return (

@@ -41,7 +41,6 @@ export const RecordingSummary = ({ media, }: { media: MyVideo }) => {
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                         <Text style={styles.duration}>{timeDisplay(media)}</Text>
                         <Text style={styles.duration}>{secondsToMin(media.duration)}</Text>
-                        {/* <DeleteButton song={song} /> */}
                     </View>
                 </View>
                 <View>
@@ -66,14 +65,14 @@ const SummaryMenu = ({ media, open, close, isVisible }: SummaryMenuProps) => {
         close()
         navigation.navigate('Playback', { video: media, inEditMode: true })
     }
-
+    console.log({ media })
     return <>
         <Menu
             visible={isVisible}
             onDismiss={close}
             anchor={<IconButton icon="dots-vertical" onPress={open} color={BLUE_COLOUR}></IconButton>}>
             <Menu.Item icon="pencil-box-outline" onPress={onEdit} title="Edit" />
-            {/* <Menu.Item icon="delete" onPress={() => { }} title="Delete" /> */}
+            <Menu.Item icon="share" onPress={() => { }} title="Share" />
         </Menu>
     </>
 }
@@ -112,8 +111,8 @@ const styles = StyleSheet.create({
 const willsmithImageSource = require('../assets/images/willsmith.png');
 
 function timeDisplay(media: MyVideo): string {
-    return media.notificationDate?.toLocaleString() ||
-        new Date(media.creationTime).toLocaleString()
+    const time = media.notificationDate ?? media.creationTime
+    return new Date(time).toLocaleString()
 }
 function titleDisplay(media: MyVideo): string {
     return media.title ||

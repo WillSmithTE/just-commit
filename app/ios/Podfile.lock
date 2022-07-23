@@ -101,6 +101,13 @@ PODS:
   - EXSplashScreen (0.14.2):
     - ExpoModulesCore
     - React-Core
+  - EXStructuredHeaders (2.1.1)
+  - EXUpdates (0.11.7):
+    - EXManifests
+    - ExpoModulesCore
+    - EXStructuredHeaders
+    - EXUpdatesInterface
+    - React-Core
   - EXUpdatesInterface (0.5.2)
   - EXWebBrowser (10.1.1):
     - ExpoModulesCore
@@ -383,6 +390,8 @@ PODS:
     - React-RCTImage
   - RNSnackbar (2.4.0):
     - React-Core
+  - RNSVG (12.1.1):
+    - React
   - Yoga (1.14.0)
 
 DEPENDENCIES:
@@ -406,6 +415,8 @@ DEPENDENCIES:
   - expo-dev-menu-interface (from `../node_modules/expo-dev-menu-interface/ios`)
   - ExpoModulesCore (from `../node_modules/expo-modules-core/ios`)
   - EXSplashScreen (from `../node_modules/expo-splash-screen/ios`)
+  - EXStructuredHeaders (from `../node_modules/expo-structured-headers/ios`)
+  - EXUpdates (from `../node_modules/expo-updates/ios`)
   - EXUpdatesInterface (from `../node_modules/expo-updates-interface/ios`)
   - EXWebBrowser (from `../node_modules/expo-web-browser/ios`)
   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
@@ -442,6 +453,7 @@ DEPENDENCIES:
   - "RNDateTimePicker (from `../node_modules/@react-native-community/datetimepicker`)"
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNSnackbar (from `../node_modules/react-native-snackbar`)
+  - RNSVG (from `../node_modules/react-native-svg`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -489,6 +501,10 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-modules-core/ios"
   EXSplashScreen:
     :path: "../node_modules/expo-splash-screen/ios"
+  EXStructuredHeaders:
+    :path: "../node_modules/expo-structured-headers/ios"
+  EXUpdates:
+    :path: "../node_modules/expo-updates/ios"
   EXUpdatesInterface:
     :path: "../node_modules/expo-updates-interface/ios"
   EXWebBrowser:
@@ -557,6 +573,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-screens"
   RNSnackbar:
     :path: "../node_modules/react-native-snackbar"
+  RNSVG:
+    :path: "../node_modules/react-native-svg"
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
@@ -582,6 +600,8 @@ SPEC CHECKSUMS:
   expo-dev-menu-interface: 395d046704878e5de471a89102ddf361cbb7e52f
   ExpoModulesCore: 32c0ccb47f477d330ee93db72505380adf0de09a
   EXSplashScreen: 21669e598804ee810547dbb6692c8deb5dd8dbf3
+  EXStructuredHeaders: 4993087b2010dbcc510f5d92555b36f523425e8d
+  EXUpdates: a83e036243b0f6ece53a8c1cb883b6751c88a5f8
   EXUpdatesInterface: 13270752afb8c61f83a09117e6b04a682b2db9eb
   EXWebBrowser: f1573262c5de753987ed526c630076eda130804d
   FBLazyVector: c71c5917ec0ad2de41d5d06a5855f6d5eda06971
@@ -616,6 +636,7 @@ SPEC CHECKSUMS:
   RNDateTimePicker: 2224ee77a86b7123377597a015502435e2e49957
   RNScreens: d6da2b9e29cf523832c2542f47bf1287318b1868
   RNSnackbar: be3333a21a453ccc272f41a8add5a71f7d44dfcd
+  RNSVG: 551acb6562324b1d52a4e0758f7ca0ec234e278f
   Yoga: e6ecf3fa25af9d4c87e94ad7d5d292eedef49749
 
 PODFILE CHECKSUM: b59faf44d7c8a5e04732b3f9799869e33c705593
