@@ -49,7 +49,9 @@ export const SaveEditModal = ({ isVisible, setVisible, video }: SaveEditModalPro
             video.notificationId ? deleteOldNotification(video.notificationId) : Promise.resolve(),
             dateToSave ? registerForNotification(dateToSave, title) : Promise.resolve(undefined)
         ])
-        const uri = Platform.OS === 'ios' ? `${asset.uri}.mov` : asset.uri
+        const uri = Platform.OS === 'ios' ?
+            convertLocalIdentifierToAssetLibrary(asset.uri, 'mov') :
+            asset.uri
         dispatch(upsertMedia({
             ...asset,
             notificationDate: dateToSave.getTime(),
@@ -127,6 +129,12 @@ async function schedulePushNotification(date: Date, title?: string): Promise<str
     // });
     return Promise.resolve('')
 }
+
+export const convertLocalIdentifierToAssetLibrary = (uri: string, ext: string) => {
+    const withoutPh = uri.replace('ph://', '')
+    const hash = withoutPh.split('/')[0];
+    return `assets-library://asset/asset.${ext}?id=${hash}&ext=${ext}`;
+};
 
 const styles = StyleSheet.create({
     modal: {

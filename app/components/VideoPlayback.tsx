@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { View, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
-import { AVPlaybackStatus, Video } from 'expo-av';
+import { AVPlaybackStatus, ResizeMode, Video } from 'expo-av';
 import Icon from './Icon';
 import { useEffect, useState } from 'react';
 import { NavigationProp, ParamListBase } from '@react-navigation/native';
@@ -17,9 +17,6 @@ import { BLUE_COLOUR } from '../constants';
 type VideoPlaybackProps = RootStackScreenProps<'Playback'> & {
     vide: AtLeast<MyVideo, 'uri'>,
 }
-// type VideoPlaybackProps = {
-//     video: AtLeast<MyVideo, 'uri'>,
-// }
 
 export const VideoPlayback = ({ route: { params: { video: selectedVideo, inEditMode } } }: VideoPlaybackProps) => {
     const playbackVideo = React.useRef<Video>(null);
@@ -35,6 +32,9 @@ export const VideoPlayback = ({ route: { params: { video: selectedVideo, inEditM
 
     useEffect(() => {
         console.log(`playbackStatus=${JSON.stringify(status, null, 2)}`)
+        if (status?.isLoaded && status.didJustFinish) {
+            playbackVideo.current!!.setPositionAsync(0)
+        }
     }, [status])
 
     useEffect(() => {
@@ -95,7 +95,7 @@ export const VideoPlayback = ({ route: { params: { video: selectedVideo, inEditM
             style={styles.video}
             source={{ uri: selectedVideo!!.uri, }}
             useNativeControls={false}
-            resizeMode="contain"
+            resizeMode={ResizeMode.CONTAIN}
             isLooping={false}
             onPlaybackStatusUpdate={newStatus => setStatus(() => newStatus)}
         />
