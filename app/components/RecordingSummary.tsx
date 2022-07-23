@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native';
-import { GetVideoHeading, MyVideo } from '../types';
+import { MyVideo } from '../types';
 import { secondsToMin } from '../services/timeUtil';
 import { Audio } from 'expo-av';
 import { useNavigation } from '@react-navigation/native';
+import { Button, Divider, IconButton, Menu } from 'react-native-paper';
+import { BLUE_COLOUR } from '../constants';
 
 export const RecordingSummary = ({ media, }: { media: MyVideo }) => {
-    console.log({ media })
-    const [moreOptionsModal, setMoreOptionsModal] = useState(false);
+    const [isMenuVisible, setIsMenuVisible] = React.useState(false);
+
     const [sound, setSound] = React.useState<Audio.Sound | undefined>();
     const [isPlaying, setIsPlaying] = React.useState(false);
     const navigation = useNavigation();
@@ -30,20 +32,43 @@ export const RecordingSummary = ({ media, }: { media: MyVideo }) => {
                 <View style={styles.imageContainer}>
                     <Image source={willsmithImageSource} style={styles.image} />
                 </View>
-                <View>
-                    <Text style={styles.title}>
-                        {GetVideoHeading(media)}
-                    </Text>
+                <View style={{ flexDirection: 'column', marginRight: 'auto', flex: 1 }}>
+                    <View>
+                        <Text style={styles.title}>
+                            {titleDisplay(media)}
+                        </Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                        <Text style={styles.duration}>{timeDisplay(media)}</Text>
+                        <Text style={styles.duration}>{secondsToMin(media.duration)}</Text>
+                        {/* <DeleteButton song={song} /> */}
+                    </View>
                 </View>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                    <Text style={styles.duration}>{media.notificationDate}</Text>
-                    <Text style={styles.duration}>{secondsToMin(media.duration)}</Text>
-                    {/* <DeleteButton song={song} /> */}
+                <View>
+                    <SummaryMenu open={() => setIsMenuVisible(true)} close={() => setIsMenuVisible(false)} isVisible={isMenuVisible} />
                 </View>
             </View>
         </TouchableOpacity >
     );
 };
+
+type SummaryMenuProps = {
+    open: () => void,
+    close: () => void,
+    isVisible: boolean,
+}
+
+const SummaryMenu = ({ open, close, isVisible }: SummaryMenuProps) => {
+    return <>
+        <Menu
+            visible={isVisible}
+            onDismiss={close}
+            anchor={<IconButton icon="dots-vertical" onPress={open} color={BLUE_COLOUR}></IconButton>}>
+            <Menu.Item icon="pencil-box-outline" onPress={() => { }} title="Edit" />
+            <Menu.Item icon="delete" onPress={() => { }} title="Delete" />
+        </Menu>
+    </>
+}
 
 const styles = StyleSheet.create({
     container: {
@@ -69,7 +94,7 @@ const styles = StyleSheet.create({
     },
     image: {
         width: 30,
-        height: 30, 
+        height: 30,
     },
     imageContainer: {
         paddingRight: 20,
@@ -78,3 +103,11 @@ const styles = StyleSheet.create({
 
 const willsmithImageSource = require('../assets/images/willsmith.png');
 
+function timeDisplay(media: MyVideo): string {
+    return media.notificationDate?.toLocaleString() ||
+        new Date(media.creationTime).toLocaleString()
+}
+function titleDisplay(media: MyVideo): string {
+    return media.title ||
+        'My commitment'
+}

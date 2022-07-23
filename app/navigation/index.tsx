@@ -105,5 +105,5 @@ function TabBarIcon(props: {
   color: string;
   family?: IC['family'];
 }) {
-  return <Icon family={props.family} props={{ size: 30, style: { marginBottom: 0 }, ...props }} color={props.color} />;
+  return <Icon family={props.family} props={{ size: 30, style: { marginBottom: 0, paddingTop: 5}, ...props }} color={props.color} />;
 }

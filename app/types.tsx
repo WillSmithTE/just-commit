@@ -44,8 +44,4 @@ export type MyVideo = MediaLibrary.Asset & {
   isNotificationAcknowledged?: boolean,
 }
 
-export function GetVideoHeading(video: MyVideo): string {
-  return video.title ?? video.notificationDate?.toString() ?? new Date(video.creationTime).toString()
-}
-
 export type AtLeast<T, K extends keyof T> = Partial<T> & Pick<T, K>

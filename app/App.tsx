@@ -10,6 +10,7 @@ import { RootSiblingParent } from 'react-native-root-siblings';
 import { Dimensions, Image, StyleSheet } from 'react-native';
 import React from 'react';
 import { PersistGate } from 'redux-persist/integration/react'
+import { Provider as PaperProvider } from 'react-native-paper';
 
 const queryClient = new QueryClient()
 
@@ -18,7 +19,9 @@ export default function App() {
     <RootSiblingParent>
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
-          <AppInternals />
+          <PaperProvider>
+            <AppInternals />
+          </PaperProvider>
         </PersistGate>
       </Provider>
     </RootSiblingParent>
