@@ -2,7 +2,7 @@
   "expo": {
     "name": "just-commit",
     "slug": "just-commit",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -35,7 +35,9 @@
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
         "true"
-      ]
+      ],
+      "package": "com.willsmithte.justcommit",
+      "versionCode": 2
     },
     "web": {
       "favicon": "./assets/images/favicon.png"

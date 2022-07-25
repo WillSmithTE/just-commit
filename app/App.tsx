@@ -6,8 +6,8 @@ import useColorScheme from './hooks/useColorScheme';
 import Navigation from './navigation';
 import { persistor, store } from './services/reduxStore';
 import { RootSiblingParent } from 'react-native-root-siblings';
-import { Dimensions, StyleSheet } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import { Dimensions, StyleSheet, View } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
 import { PersistGate } from 'redux-persist/integration/react'
 import { Provider as PaperProvider } from 'react-native-paper';
 import { loadFonts } from './hooks/usePreloadResources';
@@ -33,24 +33,28 @@ export default function App() {
     prepare();
   }, []);
 
-  useEffect(() => {
-    SplashScreen.hideAsync()
-  }, [appIsReady])
+  const onLayoutRootView = useCallback(async () => {
+    if (appIsReady) {
+      await SplashScreen.hideAsync();
+    }
+  }, [appIsReady]);
 
   if (!appIsReady) {
     return null;
   }
 
   return (
-    <RootSiblingParent>
-      <Provider store={store}>
-        <PersistGate loading={null} persistor={persistor}>
-          <PaperProvider>
-            <AppInternals />
-          </PaperProvider>
-        </PersistGate>
-      </Provider>
-    </RootSiblingParent>
+    <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
+      <RootSiblingParent>
+        <Provider store={store}>
+          <PersistGate loading={null} persistor={persistor}>
+            <PaperProvider>
+              <AppInternals />
+            </PaperProvider>
+          </PersistGate>
+        </Provider>
+      </RootSiblingParent>
+    </View>
   );
 }
 

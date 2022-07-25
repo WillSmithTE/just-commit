@@ -25,18 +25,20 @@ export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListB
     }, []);
 
     const startRecording = async () => {
+        console.debug('starting recording')
         if (Device.isDevice) {
-            setIsRecording(true)
-            const recording = await camera!!.recordAsync({codec: VideoCodec.JPEG})
+            setTimeout(() => setIsRecording(true), 200)
+            const recording = await camera!!.recordAsync({ codec: VideoCodec.JPEG })
             console.log(`new recording (recording=${JSON.stringify(recording, null, 2)}`);
             navigation.navigate('Playback', { video: { uri: recording.uri } })
         } else {
-            console.log('emulator, playing dummy video')
-            navigation.navigate('Playback', { video: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4' })
+            console.log('emulator, skipping recording')
+            navigation.navigate('Playback', { video: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4', inEditMode: true })
         }
     }
 
     const stopRecording = async () => {
+        console.debug('stopping recording')
         camera!!.stopRecording();
         setIsRecording(false)
     }
@@ -94,23 +96,23 @@ const StartRecordingIcon = ({ isRecording, start, stop }: { isRecording: boolean
     const [mode, setMode] = useState(mode1)
 
     return <>
-        {isRecording && <AnimatedCircularProgress
-            key={new Date().toString()}
-            size={maxCircleSize}
-            width={20}
-            duration={10 * 1000}
-            fill={100}
-            tintColor={mode.tintColor}
-            onAnimationComplete={() => setMode(mode === mode1 ? mode2 : mode1)}
-            backgroundColor={mode.backgroundColor}
-            style={{ transform: [{ rotate: '270deg' }] }}
-        />}
-        <View style={circleStyles.circleContainer}>
-            {!isRecording && <View style={circleStyles.outerCircle} />}
-            <Pressable onPressIn={start} onPressOut={stop}>
+        <Pressable onPressIn={start} onPressOut={stop}>
+            {isRecording && <AnimatedCircularProgress
+                key={new Date().toString()}
+                size={maxCircleSize}
+                width={20}
+                duration={10 * 1000}
+                fill={100}
+                tintColor={mode.tintColor}
+                onAnimationComplete={() => setMode(mode === mode1 ? mode2 : mode1)}
+                backgroundColor={mode.backgroundColor}
+                style={{ transform: [{ rotate: '270deg' }] }}
+            />}
+            <View style={{ ...circleStyles.circleContainer, paddingTop: isRecording ? 0 : 20 }}>
+                {!isRecording && <View style={circleStyles.outerCircle} />}
                 <View style={circleStyles.innerCircle} />
-            </Pressable>
-        </View>
+            </View>
+        </Pressable>
     </>
 }
 
@@ -124,11 +126,13 @@ const circleStyles = StyleSheet.create({
         height: outerCircleSize,
         borderColor: 'white',
         borderWidth: 3,
-        position: 'absolute',
+        // position: 'absolute',
         bottom: (maxCircleSize - outerCircleSize) / 2,
         alignSelf: 'center',
+        elevation: 100,
     },
     innerCircle: {
+        elevation: 100,
         borderRadius: innerCircleSize / 2,
         width: innerCircleSize,
         height: innerCircleSize,
@@ -138,9 +142,6 @@ const circleStyles = StyleSheet.create({
         alignSelf: 'center',
     }
 });
-
-{/* <Icon family='MaterialCommunityIcons' name='circle' color='white' props={{ size: 80, style: {borderColor: 'white', borderWidth: 5, borderRadius: 40} }} /> */ }
-const StopRecordingIcon = () => <Icon family='MaterialCommunityIcons' name='stop-circle' color='red' props={{ size: 150 }} />
 
 const styles = StyleSheet.create({
     container: {

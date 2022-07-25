@@ -3,16 +3,11 @@ import { View, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 're
 import { AVPlaybackStatus, ResizeMode, Video } from 'expo-av';
 import Icon from './Icon';
 import { useEffect, useState } from 'react';
-import { NavigationProp, ParamListBase } from '@react-navigation/native';
 import { SaveEditModal } from './SaveEditModal';
-import { AtLeast, MyVideo, RootStackScreenProps, RootTabScreenProps } from '../types';
-import { useDispatch, useSelector } from 'react-redux';
-import { clearSelectedMedia } from '../services/selectedMediaSlice';
-import { RootState } from '../services/reduxStore';
+import { AtLeast, MyVideo, RootStackScreenProps } from '../types';
+import { useDispatch } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import { isDevice } from 'expo-device';
-import { Button, IconButton, TextInput, } from 'react-native-paper';
-import { BLUE_COLOUR } from '../constants';
 import { deleteMedia } from '../services/mediaSlice';
 
 type VideoPlaybackProps = RootStackScreenProps<'Playback'> & {
@@ -35,6 +30,7 @@ export const VideoPlayback = ({ route: { params: { video: selectedVideo, inEditM
         console.log(`playbackStatus=${JSON.stringify(status, null, 2)}`)
         if (status?.isLoaded && status.didJustFinish) {
             playbackVideo.current!!.setPositionAsync(0)
+            playbackVideo.current!!.pauseAsync()
         }
     }, [status])
 
