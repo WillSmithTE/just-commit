@@ -8,6 +8,7 @@ import { useIsFocused } from '@react-navigation/native';
 import * as Device from 'expo-device';
 import { AnimatedCircularProgress } from 'react-native-circular-progress';
 import { BLUE_COLOUR } from '../constants';
+import { StartRecordingIcon } from './StartRecordingIcon';
 
 export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListBase, string, any, any> }) => {
     const [isRecording, setIsRecording] = useState(false)
@@ -53,9 +54,8 @@ export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListB
             {isFocused && <Camera style={styles.camera} type={type} ref={ref => setCamera(ref!!)}>
                 <View style={styles.bottomRow}>
                     <View style={styles.buttonContainer}>
-                        <TouchableOpacity
-                            style={styles.invisibleButton}>
-                            <Icon family='MaterialIcons' name='restore-from-trash' color='black' props={{ size: 35 }} />
+                        <TouchableOpacity style={styles.modeToggleButton}>
+                            <Icon family='MaterialCommunityIcons' name='video' color='white' props={{ size: 35 }} />
                         </TouchableOpacity>
                     </View>
                     <View style={styles.buttonContainer}>
@@ -63,7 +63,7 @@ export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListB
                     </View>
                     <View style={styles.buttonContainer}>
                         <TouchableOpacity
-                            style={Object.assign({}, styles.flipButton, isRecording ? styles.invisibleButton : {})}
+                            style={Object.assign({}, styles.flipButton, isRecording ? styles.modeToggleButton : {})}
                             onPress={() => {
                                 setType(type === CameraType.back ? CameraType.front : CameraType.back);
                             }}>
@@ -76,72 +76,6 @@ export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListB
         </>
     );
 }
-
-const maxCircleSize = 125
-const outerCircleSize = 90
-const innerCircleSize = 75
-
-const mode1 = {
-    key: 1,
-    backgroundColor: "#3d5875",
-    tintColor: '#00e0ff'
-}
-const mode2 = {
-    key: 2,
-    backgroundColor: "#00e0ff",
-    tintColor: '#3d5875'
-}
-
-const StartRecordingIcon = ({ isRecording, start, stop }: { isRecording: boolean, start: () => void, stop: () => void }) => {
-    const [mode, setMode] = useState(mode1)
-
-    return <>
-        <Pressable onPressIn={start} onPressOut={stop}>
-            {isRecording && <AnimatedCircularProgress
-                key={new Date().toString()}
-                size={maxCircleSize}
-                width={20}
-                duration={10 * 1000}
-                fill={100}
-                tintColor={mode.tintColor}
-                onAnimationComplete={() => setMode(mode === mode1 ? mode2 : mode1)}
-                backgroundColor={mode.backgroundColor}
-                style={{ transform: [{ rotate: '270deg' }] }}
-            />}
-            <View style={{ ...circleStyles.circleContainer, paddingTop: isRecording ? 0 : 20 }}>
-                {!isRecording && <View style={circleStyles.outerCircle} />}
-                <View style={circleStyles.innerCircle} />
-            </View>
-        </Pressable>
-    </>
-}
-
-const circleStyles = StyleSheet.create({
-    circleContainer: {
-        alignSelf: 'center',
-    },
-    outerCircle: {
-        borderRadius: outerCircleSize / 2,
-        width: outerCircleSize,
-        height: outerCircleSize,
-        borderColor: 'white',
-        borderWidth: 3,
-        // position: 'absolute',
-        bottom: (maxCircleSize - outerCircleSize) / 2,
-        alignSelf: 'center',
-        elevation: 100,
-    },
-    innerCircle: {
-        elevation: 100,
-        borderRadius: innerCircleSize / 2,
-        width: innerCircleSize,
-        height: innerCircleSize,
-        backgroundColor: 'white',
-        position: 'absolute',
-        bottom: (maxCircleSize - innerCircleSize) / 2,
-        alignSelf: 'center',
-    }
-});
 
 const styles = StyleSheet.create({
     container: {
@@ -158,15 +92,9 @@ const styles = StyleSheet.create({
         marginBottom: 'auto',
         marginRight: 'auto',
     },
-    invisibleButton: {
-        opacity: 0,
-        height: 0,
+    modeToggleButton: {
         marginRight: 12,
         marginBottom: 12,
-    },
-    recordButton: {
-        // marginLeft: 'auto',
-        // marginTop: 'auto'
     },
     flipButton: {
         marginRight: 12,

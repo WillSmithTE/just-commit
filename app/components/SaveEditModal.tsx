@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { Text, View, StyleSheet, Platform } from 'react-native';
-import { useState } from 'react';
+import { Text, View, StyleSheet, Platform, Alert } from 'react-native';
+import { useEffect, useState } from 'react';
 import DatePicker from 'react-native-date-picker'
 import * as MediaLibrary from 'expo-media-library';
 import { Loading } from './Loading';
@@ -18,6 +18,8 @@ type SaveEditModalProps = {
     setVisible: (val: boolean) => void,
     video: AtLeast<MyVideo, 'uri'>
 }
+
+const isDebug = false
 
 export const SaveEditModal = ({ isVisible, setVisible, video }: SaveEditModalProps) => {
     const [title, setTitle] = useState(video.title || '')
@@ -37,7 +39,7 @@ export const SaveEditModal = ({ isVisible, setVisible, video }: SaveEditModalPro
             return
         }
         let dateToSave = undefined
-        if (date) dateToSave = date
+        if (date || !isDebug) dateToSave = date
         else {
             const now = new Date()
             now.setSeconds(now.getSeconds() + 20)
@@ -53,15 +55,15 @@ export const SaveEditModal = ({ isVisible, setVisible, video }: SaveEditModalPro
             asset.uri
         const media = {
             ...asset,
-            notificationDate: dateToSave.getTime(),
+            notificationDate: dateToSave?.getTime(),
             title,
             uri,
         }
         let notificationId = undefined
         if (media.notificationDate) notificationId = await registerForNotification(media)
         dispatch(upsertMedia({ ...media, notificationId, }))
-        setLoading(false)
         setVisible(false)
+        setLoading(false)
 
         navigation.goBack()
     }
@@ -76,7 +78,7 @@ export const SaveEditModal = ({ isVisible, setVisible, video }: SaveEditModalPro
         contentContainerStyle={styles.modalView}>
 
         {isLoading && <Loading />}
-        <TextInput underlineColor='purple' mode='flat' label={'Title (optional)'}
+        <TextInput underlineColor='purple' mode='flat' label={'Name (optional)'}
             style={styles.titleTextInput} value={title} onChangeText={setTitle} autoComplete='off'
             theme={{
                 colors: {
@@ -110,7 +112,7 @@ export const SaveEditModal = ({ isVisible, setVisible, video }: SaveEditModalPro
 }
 
 const deleteOldNotification = async (notificationId: string) => {
-    // await Notifications.cancelScheduledNotificationAsync(notificationId);
+    await Notifications.cancelScheduledNotificationAsync(notificationId);
 }
 
 const registerForNotification = async (media: MyVideo) => {
@@ -180,17 +182,9 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: 'bold',
     },
-    titleLabel: {
-        fontWeight: 'bold',
-        marginBottom: 5,
-        textAlign: 'left',
-        fontSize: 20,
-        alignSelf: 'stretch',
-    },
     titleTextInput: {
         marginBottom: 15,
         textAlign: 'left',
-        fontSize: 20,
         alignSelf: 'stretch',
         backgroundColor: '#f9f9f9',
     },

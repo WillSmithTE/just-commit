@@ -19,6 +19,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { BLUE_COLOUR } from '../constants';
 import { VideoPlayback } from '../components/VideoPlayback';
 import { useLastNotificationResponse, DEFAULT_ACTION_IDENTIFIER } from 'expo-notifications';
+import Library from '../screens/Library';
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
   return (
@@ -91,13 +92,13 @@ function BottomTabNavigator() {
             tabBarIcon: ({ color }) => <TabBarIcon name="record-circle" family='MaterialCommunityIcons' color={color} />,
           })}
         />
-        {/* <BottomTab.Screen
+        <BottomTab.Screen
           name="Library"
           component={Library}
           options={({ navigation }: RootTabScreenProps<'Library'>) => ({
             tabBarIcon: ({ color }) => <TabBarIcon name="library" family='Ionicons' color={color} />,
           })}
-        /> */}
+        />
       </BottomTab.Navigator>
     </SafeAreaProvider>
   );

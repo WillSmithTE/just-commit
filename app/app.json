@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "just-commit",
+    "name": "Just Commit",
     "slug": "just-commit",
     "version": "1.0.2",
     "orientation": "portrait",
@@ -37,7 +37,7 @@
         "true"
       ],
       "package": "com.willsmithte.justcommit",
-      "versionCode": 2
+      "versionCode": 3
     },
     "web": {
       "favicon": "./assets/images/favicon.png"
@@ -49,6 +49,14 @@
           "photosPermission": "Allow $(PRODUCT_NAME) to access your photos.",
           "savePhotosPermission": "Allow $(PRODUCT_NAME) to save photos.",
           "isAccessMediaLocationEnabled": "true"
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/icon.png",
+          "color": "#ffffff",
+          "sounds": [          ]
         }
       ]
     ]

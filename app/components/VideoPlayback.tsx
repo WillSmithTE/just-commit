@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, BackHandler } from 'react-native';
 import { AVPlaybackStatus, ResizeMode, Video } from 'expo-av';
 import Icon from './Icon';
 import { useEffect, useState } from 'react';
@@ -9,6 +9,7 @@ import { useDispatch } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import { isDevice } from 'expo-device';
 import { deleteMedia } from '../services/mediaSlice';
+import { Button, IconButton } from 'react-native-paper';
 
 type VideoPlaybackProps = RootStackScreenProps<'Playback'> & {
     vide: AtLeast<MyVideo, 'uri'>,
@@ -27,7 +28,6 @@ export const VideoPlayback = ({ route: { params: { video: selectedVideo, inEditM
     }, [status?.isLoaded])
 
     useEffect(() => {
-        console.log(`playbackStatus=${JSON.stringify(status, null, 2)}`)
         if (status?.isLoaded && status.didJustFinish) {
             playbackVideo.current!!.setPositionAsync(0)
             playbackVideo.current!!.pauseAsync()
@@ -45,23 +45,19 @@ export const VideoPlayback = ({ route: { params: { video: selectedVideo, inEditM
     const exit = () => navigation.goBack()
 
     const deleteVideo = () => {
-        if (isNewVideo) {
-            console.error('shouldnt be here')
-        } else {
-            Alert.alert('Are you sure?', undefined, [
-                {
-                    text: 'Cancel',
-                    onPress: () => { },
-                    style: 'cancel',
-                },
-                {
-                    text: isNewVideo ? 'Discard' : 'Delete', onPress: () => {
-                        dispatch(deleteMedia(selectedVideo.id!!))
-                        exit()
-                    }
-                },
-            ])
-        }
+        Alert.alert('Are you sure?', undefined, [
+            {
+                text: 'Cancel',
+                onPress: () => { },
+                style: 'cancel',
+            },
+            {
+                text: isNewVideo ? 'Discard' : 'Delete', onPress: () => {
+                    dispatch(deleteMedia(selectedVideo.id!!))
+                    exit()
+                }
+            },
+        ])
     }
     const pressExit = () => {
         if (isNewVideo) {
@@ -74,6 +70,14 @@ export const VideoPlayback = ({ route: { params: { video: selectedVideo, inEditM
         setSaveModalVisible(true)
     }
 
+    useEffect(() => {
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+            pressExit()
+            return true
+        });
+        return () => backHandler.remove();
+    }, []);
+
     return <>
         <Video
             ref={playbackVideo}
@@ -85,18 +89,29 @@ export const VideoPlayback = ({ route: { params: { video: selectedVideo, inEditM
             onPlaybackStatusUpdate={newStatus => setStatus(() => newStatus)}
         />
         <View style={styles.buttonContainer}>
-            <TouchableOpacity
-                style={styles.closeButton}
-                onPress={pressExit}>
-                <Icon family='MaterialCommunityIcons' name='chevron-left' color='white' props={{ size: 60 }} />
-            </TouchableOpacity>
+            <IconButton
+                // style={styles.closeButton}
+                onPress={pressExit}
+                icon='close'
+                color='white'
+                size={30}
+            />
+            <IconButton
+                // style={styles.closeButton}
+                onPress={pressExit}
+                icon='check-circle'
+                color='red'
+                size={30}
+            />
+            {/* <Icon family='MaterialCommunityIcons' name='close' color='white' props={{ size: 50 }} /> */}
+            {/* </TouchableOpacity> */}
         </View>
         {
             status?.isLoaded ?
                 <>
                     <View style={styles.bottomRow}>
                         <TouchableOpacity onPress={deleteVideo} style={isNewVideo ? styles.invisibleButton : styles.trashButton}>
-                            <Icon family='Entypo' name='trash' color='white' size={70} />
+                            <Icon family='Entypo' name='trash' color='white' size={50} />
                         </TouchableOpacity>
                         <TouchableOpacity onPress={() =>
                             status?.isPlaying ?
@@ -104,15 +119,12 @@ export const VideoPlayback = ({ route: { params: { video: selectedVideo, inEditM
                                 : playbackVideo.current!!.playAsync().catch(console.error)
                         }>
                             {status.isPlaying ?
-                                <Icon family='Ionicons' name='pause-circle' color='red' size={90} /> :
-                                <Icon family='Ionicons' name='play-circle' color='red' size={90} />
+                                <Icon family='Ionicons' name='pause-circle' color='#fc034e' size={90} /> :
+                                <Icon family='Ionicons' name='play-circle' color='#fc034e' size={90} />
                             }
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={pressEdit} style={styles.tickButton}>
-                            {isNewVideo ?
-                                <Icon family='MaterialCommunityIcons' name='content-save' color='white' size={70} /> :
-                                <Icon family='MaterialCommunityIcons' name='pencil-box-outline' color='white' size={70} />}
-                        </TouchableOpacity>
+                        <IconButton icon={isNewVideo ? 'check-circle' : 'pencil-box-outline'} size={50} color='#fc034e'
+                            onPress={pressEdit} style={styles.tickButton} underlayColor='white' />
                     </View>
                 </> :
                 <Loading />
@@ -169,7 +181,7 @@ const styles = StyleSheet.create({
     },
     trashButton: {
         marginLeft: 36,
-        marginBottom: 12,
+        marginBottom: 20,
     },
     centeredView: {
         flex: 1,
@@ -201,7 +213,10 @@ const styles = StyleSheet.create({
         backgroundColor: '#F194FF',
     },
     buttonClose: {
-        backgroundColor: '#2196F3',
+        alignSelf: 'flex-start',
+        height: 50,
+        width: 50,
+        // backgroundColor: '#2196F3',
     },
     textStyle: {
         color: 'white',

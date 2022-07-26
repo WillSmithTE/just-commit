@@ -1,5 +1,5 @@
 import React, { } from 'react';
-import { ScrollView, StyleSheet, Text } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { RecordingSummary } from './RecordingSummary';
 import { useSelector } from 'react-redux';
@@ -21,7 +21,8 @@ export const RecordingsList = ({ timeUntil }: RecordingsListProps) => {
             showsVerticalScrollIndicator
         >
             {medias === undefined || medias.length === 0 ?
-                <Text>Make your first video to see it here.</Text> :
+                    <Text style={{color: 'white'}}>Make your first video to see it here.</Text>
+                :
                 medias.map((media) => (
                     <RecordingSummary
                         key={media.id}
