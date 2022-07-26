@@ -44,3 +44,5 @@ DONE- it's a NAME not a title
 - should pause/play just be on click on screen?
 - . home just has upcoming stuff?
 - video flipped
+- save modal lag before closing
+- save modal looks ugly

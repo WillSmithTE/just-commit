@@ -10,6 +10,7 @@ import { useNavigation } from '@react-navigation/native';
 import { isDevice } from 'expo-device';
 import { deleteMedia } from '../services/mediaSlice';
 import { Button, FAB, IconButton } from 'react-native-paper';
+import { PINK_COLOUR } from '../constants';
 
 type VideoPlaybackProps = RootStackScreenProps<'Playback'> & {
     vide: AtLeast<MyVideo, 'uri'>,
@@ -57,7 +58,7 @@ export const VideoPlayback = ({ route: { params: { video: selectedVideo, inEditM
                     exit()
                 }
             },
-        ])
+        ], { cancelable: true })
     }
     const pressExit = () => {
         if (isNewVideo) {
@@ -103,20 +104,18 @@ export const VideoPlayback = ({ route: { params: { video: selectedVideo, inEditM
             status?.isLoaded ?
                 <>
                     <View style={styles.bottomRow}>
-                        <TouchableOpacity onPress={deleteVideo} style={isNewVideo ? styles.invisibleButton : styles.trashButton}>
-                            <Icon family='Entypo' name='trash' color='white' size={50} />
-                        </TouchableOpacity>
+                        <IconButton icon='delete' style={isNewVideo ? styles.invisibleButton : styles.trashButton} onPress={deleteVideo} color='white' size={50} />
                         <TouchableOpacity onPress={() =>
                             status?.isPlaying ?
                                 playbackVideo.current!!.pauseAsync().catch(console.error)
                                 : playbackVideo.current!!.playAsync().catch(console.error)
                         }>
                             {status.isPlaying ?
-                                <Icon family='Ionicons' name='pause-circle' color='#fc034e' size={90} /> :
-                                <Icon family='Ionicons' name='play-circle' color='#fc034e' size={90} />
+                                <Icon family='Ionicons' name='pause-circle' color={PINK_COLOUR} size={90} /> :
+                                <Icon family='Ionicons' name='play-circle' color={PINK_COLOUR} size={90} />
                             }
                         </TouchableOpacity>
-                        <IconButton icon={isNewVideo ? 'chevron-right-circle' : 'pencil-box-outline'} size={50} color='#fc034e'
+                        <IconButton icon={isNewVideo ? 'chevron-right-circle' : 'pencil-box-outline'} size={50} color='white'
                             onPress={pressEdit} style={styles.tickButton} />
                     </View>
                 </> :

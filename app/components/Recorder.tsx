@@ -1,13 +1,10 @@
 import * as React from 'react';
-import { View, StyleSheet, TouchableOpacity, Pressable, Text, Animated } from 'react-native';
-import Icon from './Icon';
-import { useEffect, useRef, useState } from 'react';
+import { View, StyleSheet } from 'react-native';
+import { useEffect, useState } from 'react';
 import { Camera, CameraType, VideoCodec } from 'expo-camera';
 import { NavigationProp, ParamListBase } from '@react-navigation/native';
 import { useIsFocused } from '@react-navigation/native';
 import * as Device from 'expo-device';
-import { AnimatedCircularProgress } from 'react-native-circular-progress';
-import { BLUE_COLOUR } from '../constants';
 import { StartRecordingIcon } from './StartRecordingIcon';
 import { FAB, IconButton, Portal } from 'react-native-paper';
 
@@ -17,6 +14,8 @@ export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListB
     const [type, setType] = useState(CameraType.back);
     const [camera, setCamera] = useState<Camera | undefined>();
     const isFocused = useIsFocused();
+
+    console.log(`recorder render`)
 
     useEffect(() => {
         (async () => {
@@ -29,7 +28,8 @@ export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListB
     const startRecording = async () => {
         console.debug('starting recording')
         if (Device.isDevice) {
-            setTimeout(() => setIsRecording(true), 200)
+            // setTimeout(() => setIsRecording(true), 200)
+            setIsRecording(true)
             const recording = await camera!!.recordAsync({ codec: VideoCodec.JPEG })
             console.log(`new recording (recording=${JSON.stringify(recording, null, 2)}`);
             navigation.navigate('Playback', { video: { uri: recording.uri } })
@@ -54,15 +54,13 @@ export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListB
     return (
         <>
             {isFocused && <Camera style={styles.camera} type={type} ref={ref => setCamera(ref!!)}>
-                {/* <View style={{ flexDirection: 'row', marginTop: 'auto',  }}> */}
                 <View>
                     <ModePicker state={modePickerState} setState={setModePickerState} />
                 </View>
                 <View style={styles.bottomRow}>
-                    {/* <ModePicker state={modePickerState} setState={setModePickerState} /> */}
                     <View style={styles.buttonContainer}>
 
-                        <IconButton icon='video-box' color='white' size={35} style={styles.invisibleButton}/>
+                        <IconButton icon='video-box' color='white' size={35} style={styles.invisibleButton} />
                     </View>
                     <View style={styles.buttonContainer}>
                         <StartRecordingIcon start={startRecording} stop={stopRecording} isRecording={isRecording} />
@@ -74,7 +72,6 @@ export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListB
                             }} />
                     </View>
                 </View>
-                {/* </View> */}
             </Camera>
             }
         </>
@@ -131,7 +128,7 @@ type ModePickerProps = {
 }
 
 const audioMode = {
-    icon: 'account-voice',
+    icon: 'microphone',
     key: 'audio',
 }
 const videoMode = {
