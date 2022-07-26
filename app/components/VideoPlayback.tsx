@@ -9,7 +9,7 @@ import { useDispatch } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import { isDevice } from 'expo-device';
 import { deleteMedia } from '../services/mediaSlice';
-import { Button, IconButton } from 'react-native-paper';
+import { Button, FAB, IconButton } from 'react-native-paper';
 
 type VideoPlaybackProps = RootStackScreenProps<'Playback'> & {
     vide: AtLeast<MyVideo, 'uri'>,
@@ -53,7 +53,7 @@ export const VideoPlayback = ({ route: { params: { video: selectedVideo, inEditM
             },
             {
                 text: isNewVideo ? 'Discard' : 'Delete', onPress: () => {
-                    dispatch(deleteMedia(selectedVideo.id!!))
+                    !isNewVideo && dispatch(deleteMedia(selectedVideo.id!!))
                     exit()
                 }
             },
@@ -94,14 +94,7 @@ export const VideoPlayback = ({ route: { params: { video: selectedVideo, inEditM
                 onPress={pressExit}
                 icon='close'
                 color='white'
-                size={30}
-            />
-            <IconButton
-                // style={styles.closeButton}
-                onPress={pressExit}
-                icon='check-circle'
-                color='red'
-                size={30}
+                size={40}
             />
             {/* <Icon family='MaterialCommunityIcons' name='close' color='white' props={{ size: 50 }} /> */}
             {/* </TouchableOpacity> */}
@@ -123,8 +116,8 @@ export const VideoPlayback = ({ route: { params: { video: selectedVideo, inEditM
                                 <Icon family='Ionicons' name='play-circle' color='#fc034e' size={90} />
                             }
                         </TouchableOpacity>
-                        <IconButton icon={isNewVideo ? 'check-circle' : 'pencil-box-outline'} size={50} color='#fc034e'
-                            onPress={pressEdit} style={styles.tickButton} underlayColor='white' />
+                        <IconButton icon={isNewVideo ? 'chevron-right-circle' : 'pencil-box-outline'} size={50} color='#fc034e'
+                            onPress={pressEdit} style={styles.tickButton} />
                     </View>
                 </> :
                 <Loading />
@@ -156,7 +149,7 @@ const styles = StyleSheet.create({
         opacity: 0,
         height: 0,
         marginLeft: 36,
-        marginBottom: 12,
+        marginBottom: 24,
     },
     bottomRow: {
         justifyContent: 'space-between',
@@ -181,7 +174,7 @@ const styles = StyleSheet.create({
     },
     trashButton: {
         marginLeft: 36,
-        marginBottom: 20,
+        marginBottom: 24,
     },
     centeredView: {
         flex: 1,
@@ -227,4 +220,5 @@ const styles = StyleSheet.create({
         marginBottom: 15,
         textAlign: 'center',
     },
-})  
+})
+

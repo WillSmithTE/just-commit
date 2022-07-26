@@ -9,6 +9,7 @@ import * as Device from 'expo-device';
 import { AnimatedCircularProgress } from 'react-native-circular-progress';
 import { BLUE_COLOUR } from '../constants';
 import { StartRecordingIcon } from './StartRecordingIcon';
+import { FAB, IconButton, Portal } from 'react-native-paper';
 
 export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListBase, string, any, any> }) => {
     const [isRecording, setIsRecording] = useState(false)
@@ -48,29 +49,32 @@ export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListB
         console.error(`no permissions for camera recording`)
         return <View />;
     }
+    const [modePickerState, setModePickerState] = React.useState({ open: false });
 
     return (
         <>
             {isFocused && <Camera style={styles.camera} type={type} ref={ref => setCamera(ref!!)}>
+                {/* <View style={{ flexDirection: 'row', marginTop: 'auto',  }}> */}
+                <View>
+                    <ModePicker state={modePickerState} setState={setModePickerState} />
+                </View>
                 <View style={styles.bottomRow}>
+                    {/* <ModePicker state={modePickerState} setState={setModePickerState} /> */}
                     <View style={styles.buttonContainer}>
-                        <TouchableOpacity style={styles.modeToggleButton}>
-                            <Icon family='MaterialCommunityIcons' name='video' color='white' props={{ size: 35 }} />
-                        </TouchableOpacity>
+
+                        <IconButton icon='video-box' color='white' size={35} style={styles.invisibleButton}/>
                     </View>
                     <View style={styles.buttonContainer}>
                         <StartRecordingIcon start={startRecording} stop={stopRecording} isRecording={isRecording} />
                     </View>
                     <View style={styles.buttonContainer}>
-                        <TouchableOpacity
-                            style={Object.assign({}, styles.flipButton, isRecording ? styles.modeToggleButton : {})}
+                        <IconButton icon='camera-flip' color='white' size={35} style={styles.flipButton}
                             onPress={() => {
                                 setType(type === CameraType.back ? CameraType.front : CameraType.back);
-                            }}>
-                            <Icon family='MaterialIcons' name='flip-camera-ios' color='white' props={{ size: 35 }} />
-                        </TouchableOpacity>
+                            }} />
                     </View>
                 </View>
+                {/* </View> */}
             </Camera>
             }
         </>
@@ -85,22 +89,26 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     buttonContainer: {
-        backgroundColor: 'transparent',
+        // backgroundColor: 'transparent',
         margin: 20,
     },
     closeButton: {
         marginBottom: 'auto',
         marginRight: 'auto',
     },
-    modeToggleButton: {
-        marginRight: 12,
+    invisibleButton: {
+        opacity: 0,
+        marginLeft: 12,
         marginBottom: 12,
     },
     flipButton: {
         marginRight: 12,
-        marginBottom: 12,
+        marginBottom: 16,
     },
     bottomRow: {
+        position: 'absolute',
+        bottom: 0,
+        width: '100%',
         justifyContent: 'space-between',
         flexDirection: 'row',
         marginTop: 'auto',
@@ -115,12 +123,60 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
     },
-    deleteButton: {
-        marginLeft: 24,
-        marginBottom: 12,
+})
+
+type ModePickerProps = {
+    state: { open: boolean }
+    setState: (state: { open: boolean }) => void
+}
+
+const audioMode = {
+    icon: 'account-voice',
+    key: 'audio',
+}
+const videoMode = {
+    icon: 'video',
+    key: 'video',
+}
+
+const ModePicker = ({ state, setState }: ModePickerProps) => {
+    const onStateChange = ({ open }: { open: boolean }) => setState({ open });
+    const [mode, setMode] = useState(videoMode)
+    const { open } = state;
+
+    return (
+        // <View style={{ flex: 1, position: 'absolute', bottom: 0 }}>
+        <Portal>
+            <FAB.Group
+                fabStyle={fabStyles.fabStyle}
+                style={fabStyles.groupStyle}
+                // style={{ position: 'absolute' }}
+                open={open}
+                icon={open ? 'plus' : mode.icon}
+                actions={[audioMode, videoMode].map((mode) => ({
+                    icon: mode.icon,
+                    onPress: () => setMode(mode)
+                }))}
+                onStateChange={onStateChange}
+            />
+        </Portal>
+    );
+};
+
+const fabStyles = StyleSheet.create({
+    fabStyle: {
+        marginBottom: 80,
+        marginLeft: 30,
+        left: 0,
+        bottom: 0,
+        backgroundColor: '#fc034e',
+        justifyContent: 'center',
+        alignItems: 'center'
     },
-    tickButton: {
-        marginRight: 24,
-        marginBottom: 12,
-    },
-})  
+    groupStyle: {
+        left: 0,
+        bottom: 0,
+        justifyContent: 'flex-end',
+        alignItems: 'flex-start'
+    }
+})

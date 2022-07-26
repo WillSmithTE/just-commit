@@ -31,13 +31,16 @@ TESTING- no notification icon
    - https://docs.expo.dev/tutorial/sharing/
 - wording for notification. completion  time? deadline?
 - is notification and deadline different?
-TESTING - add library. home just has upcoming stuff
+DONE - add library
 - have to  add deadline? non optional?
 -  guides you  through i t after  recording. when's this due? do you want to be  notified? with a little back button
    - tik does video playback with "next" button bottom right. Then do everything there. could do? no modal at all? 
       theirs is a little busy
-TESTING- right arrow bottom right,  x in top left for exit
+DONE- right arrow bottom right,  x in top left for exit
 - what to do on tap? tik tok will do: tap? show square with expanded border. hold? only expanded border, nothing inside
-TESTING- it's a NAME not a title
+DONE- it's a NAME not a title
 - performance of record button
 - newsfeed with your friends/celebs. pay to see the celebs?
+- should pause/play just be on click on screen?
+- . home just has upcoming stuff?
+- video flipped
