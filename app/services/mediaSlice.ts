@@ -15,9 +15,11 @@ export const mediaSlice = createSlice({
     initialState,
     reducers: {
         upsertMedia: (state, action: PayloadAction<MyVideo>) => {
-            console.debug(`upserting (media=${JSON.stringify(action.payload, null, 2)})`)
+            console.debug(`upserting (${JSON.stringify({ new: action.payload, current: state.medias }, null, 2)})`)
             if (state.medias) {
+                console.debug(1)
                 const index = state?.medias?.findIndex(({ id }) => action.payload.id === id)
+                console.debug({index})
                 if (index === -1) {
                     state.medias = [action.payload].concat(state.medias)
                 } else {

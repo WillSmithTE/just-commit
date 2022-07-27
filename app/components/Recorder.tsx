@@ -17,6 +17,8 @@ export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListB
 
     console.log(`recorder render`)
 
+    console.log({isFocused})
+
     useEffect(() => {
         (async () => {
             const { status: cameraStatus } = await Camera.requestCameraPermissionsAsync();
@@ -30,7 +32,7 @@ export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListB
         if (Device.isDevice) {
             // setTimeout(() => setIsRecording(true), 200)
             setIsRecording(true)
-            const recording = await camera!!.recordAsync({ codec: VideoCodec.JPEG })
+            const recording = await camera!!.recordAsync() //({ codec: VideoCodec.JPEG, quality: '720p' })
             console.log(`new recording (recording=${JSON.stringify(recording, null, 2)}`);
             navigation.navigate('Playback', { video: { uri: recording.uri } })
         } else {
@@ -53,7 +55,7 @@ export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListB
 
     return (
         <>
-            {isFocused && <Camera style={styles.camera} type={type} ref={ref => setCamera(ref!!)}>
+            {isFocused && <Camera style={styles.camera} type={type} ref={ref => setCamera(ref!!)} >
                 <View>
                     <ModePicker state={modePickerState} setState={setModePickerState} />
                 </View>

@@ -29,6 +29,7 @@ export const VideoPlayback = ({ route: { params: { video: selectedVideo, inEditM
     }, [status?.isLoaded])
 
     useEffect(() => {
+        console.debug(`playbackStatus=${JSON.stringify(status, null, 2)}`)
         if (status?.isLoaded && status.didJustFinish) {
             playbackVideo.current!!.setPositionAsync(0)
             playbackVideo.current!!.pauseAsync()

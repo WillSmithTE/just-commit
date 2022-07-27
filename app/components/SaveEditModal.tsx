@@ -6,12 +6,13 @@ import * as MediaLibrary from 'expo-media-library';
 import { Loading } from './Loading';
 import * as Notifications from 'expo-notifications';
 import { registerForNotificationsAsync } from './Notification';
-import { AtLeast, MyVideo } from '../types';
+import { AtLeast, isMyVideo, MyVideo } from '../types';
 import { useDispatch } from 'react-redux';
 import { upsertMedia } from '../services/mediaSlice';
 import { Button, IconButton, Modal, TextInput, } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import Icon from './Icon';
+import { isDevice } from 'expo-device';
 
 type SaveEditModalProps = {
     isVisible: boolean,
@@ -29,6 +30,7 @@ export const SaveEditModal = ({ isVisible, setVisible, video }: SaveEditModalPro
     const [isLoading, setLoading] = useState(false)
     const dispatch = useDispatch()
     const navigation = useNavigation();
+    const isNewMode = () => isMyVideo(video)
 
     const onPressSave = async () => {
         setLoading(true)
@@ -46,22 +48,21 @@ export const SaveEditModal = ({ isVisible, setVisible, video }: SaveEditModalPro
             dateToSave = now
         }
 
-        const [asset, _,] = await Promise.all([
-            MediaLibrary.createAssetAsync(video.uri),
-            video.notificationId ? deleteOldNotification(video.notificationId) : Promise.resolve(),
-        ])
-        const uri = Platform.OS === 'ios' ?
-            convertLocalIdentifierToAssetLibrary(asset.uri, 'mov') :
-            asset.uri
-        const media = {
-            ...asset,
+        let mediaToSave
+        if (isMyVideo(video)) mediaToSave = video
+        else {
+            mediaToSave = await MediaLibrary.createAssetAsync(video.uri)
+            video.notificationId && await deleteOldNotification(video.notificationId)
+            if (Platform.OS === 'ios' && isDevice) mediaToSave.uri = convertLocalIdentifierToAssetLibrary(mediaToSave.uri, 'mov')
+        }
+        mediaToSave = {
+            ...mediaToSave,
             notificationDate: dateToSave?.getTime(),
             title,
-            uri,
         }
         let notificationId = undefined
-        if (media.notificationDate) notificationId = await registerForNotification(media)
-        dispatch(upsertMedia({ ...media, notificationId, }))
+        if (mediaToSave.notificationDate) notificationId = await registerForNotification(mediaToSave)
+        dispatch(upsertMedia({ ...mediaToSave, notificationId, }))
         setVisible(false)
         setLoading(false)
 

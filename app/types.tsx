@@ -47,4 +47,15 @@ export type MyVideo = MediaLibrary.Asset & {
   isNotificationAcknowledged?: boolean,
 }
 
+export function isMyVideo(video: AtLeast<MyVideo, 'uri'>): video is MyVideo {
+  return isMediaLibAsset(video)
+}
+
+function isMediaLibAsset(asset: { [prop: string]: any }): asset is MediaLibrary.Asset {
+  ['id', 'duration', 'modificationTime', 'creationTime', 'height', 'width', 'mediaType', 'uri', 'filename']
+    .forEach((assetProp) => { if (asset[assetProp] === undefined) return false })
+  return true
+}
+
+
 export type AtLeast<T, K extends keyof T> = Partial<T> & Pick<T, K>

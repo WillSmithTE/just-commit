@@ -6,7 +6,7 @@ TESTING- use nav for playback on lib and home
 DONE/DUPLICATED- make save button more clear
 DONE- hold for video record? was pip's intuition
 DONE- autoplay video
-- edit adds a new one
+DONE- edit adds a new one
 TESTING- delete should confirm
 TESTING- for save, next? use chevron right?
 TESTING- back button after new video doesnt do anythting. 
@@ -46,3 +46,4 @@ DONE- it's a NAME not a title
 - video flipped
 - save modal lag before closing
 - save modal looks ugly
+- why just loading on playback after tap? need to do the error handling
