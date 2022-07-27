@@ -2,20 +2,20 @@
 DONE- move record stuff to tab on bottom
 DONE - refactor to redux-persist, remove manual saves
 DONE- use https://callstack.github.io/react-native-paper/getting-started.html for modal and buttons
-TESTING- use nav for playback on lib and home
+DONE- use nav for playback on lib and home
 DONE/DUPLICATED- make save button more clear
 DONE- hold for video record? was pip's intuition
 DONE- autoplay video
 DONE- edit adds a new one
-TESTING- delete should confirm
-TESTING- for save, next? use chevron right?
+DONE- delete should confirm
+DONE- for save, next? use chevron right?
 TESTING- back button after new video doesnt do anythting. 
-TESTING- pressing  back on phone with new  video just clears without confirmation. 
+DONE- pressing  back on phone with new  video just clears without confirmation. 
 - box under record circle
 - after saving, take back to home? not sure
 TESTING- auto notification without setting one
-- edit and save with title a fter having none, is infinite spin. 
-- maybe need an error handler toast
+DONE- edit and save with title a fter having none, is infinite spin. 
+DONE- maybe need an error handler toast
    - https://www.npmjs.com/package/react-native-flash-message
 TESTING- no notification icon
 - colour of the recording button, should be white but is gray
@@ -42,7 +42,7 @@ DONE- it's a NAME not a title
 - performance of record button
 - newsfeed with your friends/celebs. pay to see the celebs?
 - should pause/play just be on click on screen?
-- . home just has upcoming stuff?
+- home just has upcoming stuff?
 - video flipped
 - save modal lag before closing
 - save modal looks ugly

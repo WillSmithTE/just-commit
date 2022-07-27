@@ -7,6 +7,7 @@ import { useIsFocused } from '@react-navigation/native';
 import * as Device from 'expo-device';
 import { StartRecordingIcon } from './StartRecordingIcon';
 import { FAB, IconButton, Portal } from 'react-native-paper';
+import { showMessage } from 'react-native-flash-message';
 
 export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListBase, string, any, any> }) => {
     const [isRecording, setIsRecording] = useState(false)
@@ -14,10 +15,6 @@ export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListB
     const [type, setType] = useState(CameraType.back);
     const [camera, setCamera] = useState<Camera | undefined>();
     const isFocused = useIsFocused();
-
-    console.log(`recorder render`)
-
-    console.log({isFocused})
 
     useEffect(() => {
         (async () => {
@@ -29,12 +26,19 @@ export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListB
 
     const startRecording = async () => {
         console.debug('starting recording')
+        const startRecordingTime = new Date()
+        console.debug({startRecordingTime: startRecordingTime.getTime()})
         if (Device.isDevice) {
             // setTimeout(() => setIsRecording(true), 200)
-            setIsRecording(true)
+            setTimeout(() => setIsRecording(true), 200)
             const recording = await camera!!.recordAsync() //({ codec: VideoCodec.JPEG, quality: '720p' })
-            console.log(`new recording (recording=${JSON.stringify(recording, null, 2)}`);
-            navigation.navigate('Playback', { video: { uri: recording.uri } })
+            const recordingTime = (new Date()).getTime() - startRecordingTime?.getTime()
+            console.log(`new recording (recording=${JSON.stringify(recording, null, 2)}, recordingTime=${recordingTime}`);
+            if (recordingTime < 2000) {
+                showMessage({ message: `You'll have to hold it longer, sorry!`, description: 'Video too short', type: 'info' })
+            } else {
+                navigation.navigate('Playback', { video: { uri: recording.uri } })
+            }
         } else {
             console.log('emulator, skipping recording')
             navigation.navigate('Playback', { video: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4', inEditMode: true })
@@ -55,7 +59,7 @@ export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListB
 
     return (
         <>
-            {isFocused && <Camera style={styles.camera} type={type} ref={ref => setCamera(ref!!)} >
+            {isFocused && <Camera style={styles.camera} type={type} ref={ref => setCamera(ref!!)} onCameraReady={() => console.log('ready now')}>
                 <View>
                     <ModePicker state={modePickerState} setState={setModePickerState} />
                 </View>

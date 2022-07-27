@@ -20,6 +20,9 @@ import { BLUE_COLOUR } from '../constants';
 import { VideoPlayback } from '../components/VideoPlayback';
 import { useLastNotificationResponse, DEFAULT_ACTION_IDENTIFIER } from 'expo-notifications';
 import Library from '../screens/Library';
+import { useSelector } from 'react-redux';
+import { RootState } from '../services/reduxStore';
+import { showError } from '../components/Error';
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
   return (
@@ -39,6 +42,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 function RootNavigator() {
   const lastNotificationResponse = useLastNotificationResponse();
   const navigation = useNavigation()
+  const medias = useSelector((state: RootState) => state.media.medias)
 
   React.useEffect(() => {
     if (
@@ -46,7 +50,10 @@ function RootNavigator() {
       lastNotificationResponse.notification.request.content.data.media &&
       lastNotificationResponse.actionIdentifier === DEFAULT_ACTION_IDENTIFIER
     ) {
-      navigation.navigate('Playback', { video: lastNotificationResponse.notification.request.content.data.media as MyVideo })
+      const id = lastNotificationResponse.notification.request.content.data.id as string
+      const video = medias?.find((saved) => saved.id === id)
+      if (video) navigation.navigate('Playback', { video })
+      else showError(`tried to nav from notification but media not found (id=${id})`)
     }
   }, [lastNotificationResponse]);
 

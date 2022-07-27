@@ -24,7 +24,7 @@ const isDebug = false
 
 export const SaveEditModal = ({ isVisible, setVisible, video }: SaveEditModalProps) => {
     const [title, setTitle] = useState(video.title || '')
-    const [date, setDate] = useState<Date | undefined>(video.notificationDate ? new Date(video.notificationDate) : undefined)
+    const [date, setDate] = useState<Date | undefined>(video.deadline ? new Date(video.deadline.date) : undefined)
     const [dateOpen, setDateOpen] = useState(false)
     const [permissionsStatus, requestPermission] = MediaLibrary.usePermissions();
     const [isLoading, setLoading] = useState(false)
@@ -48,21 +48,24 @@ export const SaveEditModal = ({ isVisible, setVisible, video }: SaveEditModalPro
             dateToSave = now
         }
 
-        let mediaToSave
-        if (isMyVideo(video)) mediaToSave = video
+        let mediaToSave: MyVideo
+        if (isMyVideo(video)) mediaToSave = video // if in edit mode
         else {
             mediaToSave = await MediaLibrary.createAssetAsync(video.uri)
-            video.notificationId && await deleteOldNotification(video.notificationId)
+            video.deadline && await deleteOldNotification(video.deadline.id)
             if (Platform.OS === 'ios' && isDevice) mediaToSave.uri = convertLocalIdentifierToAssetLibrary(mediaToSave.uri, 'mov')
         }
+        const deadline = date ?
+            {
+                id: await registerForNotification(mediaToSave.id, date.getTime(), title),
+                date: date.getTime()
+            } : undefined
         mediaToSave = {
             ...mediaToSave,
-            notificationDate: dateToSave?.getTime(),
+            deadline,
             title,
         }
-        let notificationId = undefined
-        if (mediaToSave.notificationDate) notificationId = await registerForNotification(mediaToSave)
-        dispatch(upsertMedia({ ...mediaToSave, notificationId, }))
+        dispatch(upsertMedia({ ...mediaToSave }))
         setVisible(false)
         setLoading(false)
 
@@ -91,7 +94,7 @@ export const SaveEditModal = ({ isVisible, setVisible, video }: SaveEditModalPro
             <Button mode='outlined' icon='bell-outline' style={styles.notificationButton} onPress={() => {
                 if (date === undefined) setDate(new Date())
                 setDateOpen(true)
-            }}>{date ? date.toLocaleString() : 'Add notification'}</Button>
+            }}>{date ? date.toLocaleString() : 'Add deadline'}</Button>
             {date && <IconButton icon="close" size={35} onPress={() => setDate(undefined)} />}
         </View>
         {date && <DatePicker
@@ -116,20 +119,20 @@ const deleteOldNotification = async (notificationId: string) => {
     await Notifications.cancelScheduledNotificationAsync(notificationId);
 }
 
-const registerForNotification = async (media: MyVideo) => {
-    console.debug(`registering for notification (date=${media.notificationDate}`)
+const registerForNotification = async (id: string, date: number, title?: string) => {
+    console.debug(`registering for notification (date=${date}`)
     await registerForNotificationsAsync()
-    return schedulePushNotification(media)
+    return schedulePushNotification(id, date, title)
 }
 
-async function schedulePushNotification(media: MyVideo): Promise<string> {
-    return media.notificationDate ? await Notifications.scheduleNotificationAsync({
+async function schedulePushNotification(id: string, date: number, title?: string): Promise<string> {
+    return date ? await Notifications.scheduleNotificationAsync({
         content: {
-            title: media.title ? `Reminder: ${media.title}` : "You've been reminded!",
+            title: title ? `Reminder: ${title}` : "You've been reminded!",
             body: 'Come on, watch your vid now. You got this 💃 🕺',
-            data: { media },
+            data: { id },
         },
-        trigger: { date: media.notificationDate },
+        trigger: { date },
     }) : Promise.reject()
 }
 

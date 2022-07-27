@@ -11,6 +11,7 @@ import { isDevice } from 'expo-device';
 import { deleteMedia } from '../services/mediaSlice';
 import { Button, FAB, IconButton } from 'react-native-paper';
 import { PINK_COLOUR } from '../constants';
+import { showError, showError2 } from './Error';
 
 type VideoPlaybackProps = RootStackScreenProps<'Playback'> & {
     vide: AtLeast<MyVideo, 'uri'>,
@@ -89,6 +90,7 @@ export const VideoPlayback = ({ route: { params: { video: selectedVideo, inEditM
             resizeMode={ResizeMode.CONTAIN}
             isLooping={false}
             onPlaybackStatusUpdate={newStatus => setStatus(() => newStatus)}
+            onError={(error) => showError2({ message: `oops! something went wrong playing your video`, description: error })}
         />
         <View style={styles.buttonContainer}>
             <IconButton

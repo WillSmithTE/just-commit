@@ -33,7 +33,7 @@ export const StartRecordingIcon = ({ isRecording, start, stop }: { isRecording: 
                 key={new Date().toString()}
                 size={maxCircleSize}
                 width={20}
-                duration={10 * 1000}
+                duration={5 * 1000}
                 fill={100}
                 tintColor={mode.tintColor}
                 onAnimationComplete={() => setMode(mode === mode1 ? mode2 : mode1)}

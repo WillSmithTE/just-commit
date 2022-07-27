@@ -52,7 +52,8 @@
     "react-query": "^3.34.12",
     "react-redux": "^7.2.6",
     "redux-persist": "^6.0.0",
-    "redux-persist-expo-filesystem": "^2.0.0"
+    "redux-persist-expo-filesystem": "^2.0.0",
+    "scope-extensions-js": "^1.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
