@@ -8,6 +8,7 @@ import { Button, Divider, IconButton, Menu } from 'react-native-paper';
 import { BLUE_COLOUR } from '../constants';
 import { useDispatch } from 'react-redux';
 import { deleteMedia } from '../services/mediaSlice';
+import { showMessage, hideMessage } from "react-native-flash-message";
 
 export const RecordingSummary = ({ media, }: { media: MyVideo }) => {
     const [isMenuVisible, setIsMenuVisible] = React.useState(false);
@@ -75,7 +76,7 @@ const SummaryMenu = ({ media, open, close, isVisible }: SummaryMenuProps) => {
             onDismiss={close}
             anchor={<IconButton icon="dots-vertical" onPress={open} color={BLUE_COLOUR}></IconButton>}>
             <Menu.Item icon="pencil-box-outline" onPress={onEdit} title="Edit" />
-            <Menu.Item icon="share" onPress={() => { }} title="Share" />
+            <Menu.Item icon="share" onPress={() => { showMessage({message: 'Coming soon!', type: 'success'})}} title="Share" />
             <Menu.Item icon="delete" onPress={() => dispatch(deleteMedia(media.id))} title="Delete" />
         </Menu>
     </>

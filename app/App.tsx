@@ -12,6 +12,7 @@ import { PersistGate } from 'redux-persist/integration/react'
 import { Provider as PaperProvider } from 'react-native-paper';
 import { loadFonts } from './hooks/usePreloadResources';
 import * as SplashScreen from 'expo-splash-screen';
+import FlashMessage from "react-native-flash-message";
 
 const queryClient = new QueryClient()
 SplashScreen.preventAutoHideAsync();
@@ -65,6 +66,7 @@ const AppInternals = () => {
     <QueryClientProvider client={queryClient}>
       <Navigation colorScheme={colorScheme} />
       <StatusBar />
+      <FlashMessage position='bottom' />
     </QueryClientProvider>
   );
 }
