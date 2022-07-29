@@ -10,5 +10,6 @@ export enum Feature {
     FULL_SCREEN_SAVE_EDIT = 'v2-save-edit',
     NOTHING = 'nothing',
     FULL_RECORD_SCREEN = 'v2-record-button',
-    RECORD_FAB_IN_MIDDLE = 'record-fab-in-middle'
+    RECORD_FAB_IN_MIDDLE = 'record-fab-in-middle',
+    OPEN_SAVE_ON_TAP_PLAYBACK = 'open-save-on-tap-playback',
   }

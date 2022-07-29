@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, BackHandler, ImageBackground } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, BackHandler, ImageBackground, Pressable } from 'react-native';
 import { AVPlaybackStatus, ResizeMode, Video, Audio } from 'expo-av';
 import Icon from './Icon';
 import { useEffect, useState } from 'react';
@@ -12,6 +12,7 @@ import { deleteMedia } from '../services/mediaSlice';
 import { Button, FAB, IconButton } from 'react-native-paper';
 import { PINK_COLOUR } from '../constants';
 import { showError, showError2 } from './Error';
+import { Feature, useFeature } from '../hooks/useFeature';
 
 type VideoPlaybackProps = RootStackScreenProps<'Playback'> & {
     media: AtLeast2<MyMedia, 'uri', 'type'>,
@@ -23,7 +24,7 @@ export const Playback = ({ route: { params: { media, inEditMode } } }: VideoPlay
     const [status, setStatus] = useState<AVPlaybackStatus | undefined>();
     const [isSaveModalVisible, setSaveModalVisible] = useState(inEditMode === true)
     const navigation = useNavigation();
-
+    const openSaveOnTap = useFeature(Feature.OPEN_SAVE_ON_TAP_PLAYBACK)
     const playback = media.type === 'video' ? playbackVideo.current : playbackAudio
 
     media.type === 'video' && React.useMemo(() => {
@@ -99,7 +100,7 @@ export const Playback = ({ route: { params: { media, inEditMode } } }: VideoPlay
         return () => backHandler.remove();
     }, []);
 
-    return <>
+    return <Pressable onPress={() => openSaveOnTap && pressEdit()} style={{flex: 1}}>
         {media.type === 'video' && <Video
             ref={playbackVideo}
             style={styles.video}
@@ -146,7 +147,7 @@ export const Playback = ({ route: { params: { media, inEditMode } } }: VideoPlay
                 <Loading />
         }
         <SaveEditModal isVisible={isSaveModalVisible} setVisible={setSaveModalVisible} media={media!!} />
-    </>
+    </Pressable>
 }
 
 const Loading = () => <View>

@@ -29,6 +29,10 @@ const features = [
     label: 'Full screen save & edit',
     key: Feature.FULL_SCREEN_SAVE_EDIT,
   },
+  {
+    label: 'Save on tap playback',
+    key: Feature.OPEN_SAVE_ON_TAP_PLAYBACK,
+  },
 ]
 
 export default function Settings({ }: RootTabScreenProps<'Record'>) {

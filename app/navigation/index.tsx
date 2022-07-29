@@ -27,6 +27,7 @@ import Groups from '../screens/Groups';
 import Settings from '../screens/Settings';
 import { IconButton } from 'react-native-paper';
 import { Feature } from '../hooks/useFeature';
+import SaveEditScreen from '../screens/SaveEditScreen';
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
   return (
@@ -67,6 +68,7 @@ function RootNavigator() {
       <Stack.Screen name="Root" component={BottomTabNavigator} options={{ headerShown: false }} />
       <Stack.Screen name="Playback" component={Playback} options={{ headerShown: false }} />
       <Stack.Screen name="RecordFullscreen" component={RecordScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="SaveEditFullScreen" component={SaveEditScreen} options={{ headerShown: false }} />
       <Stack.Screen name="NotFound" component={NotFoundScreen} options={{ title: 'Oops!' }} />
     </Stack.Navigator>
   );

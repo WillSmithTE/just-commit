@@ -24,6 +24,7 @@ export type RootStackParamList = {
   };
   Settings: undefined
   RecordFullscreen: undefined
+  SaveEditFullScreen: undefined
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> = NativeStackScreenProps<

@@ -255,7 +255,6 @@ const ModePicker = ({ mode, setMode, open, setOpen }: ModePickerProps) => {
 const fabStyles = (fullRecordScreen: boolean, isFabInMiddle: boolean) => StyleSheet.create({
     fabStyle: {
         marginBottom: fullRecordScreen ? 30 : 80,
-        marginLeft: 30,
         backgroundColor: '#fc034e',
         justifyContent: 'center',
         alignItems: 'center',
