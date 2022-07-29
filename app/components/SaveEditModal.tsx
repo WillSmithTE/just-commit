@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Text, View, StyleSheet, Platform, Alert, NativeModules, TouchableOpacity } from 'react-native';
+import { Text, View, StyleSheet, Platform, Alert, NativeModules, TouchableOpacity, TextInput } from 'react-native';
 import { useEffect, useState } from 'react';
 import DatePicker from 'react-native-date-picker'
 import * as MediaLibrary from 'expo-media-library';
@@ -9,7 +9,7 @@ import { registerForNotificationsAsync } from './Notification';
 import { AtLeast, AtLeast2, isMyVideo, MyMedia } from '../types';
 import { useDispatch } from 'react-redux';
 import { upsertMedia } from '../services/mediaSlice';
-import { Button, IconButton, Modal, Portal, RadioButton, TextInput, } from 'react-native-paper';
+import { Button, IconButton, Modal, Portal, RadioButton, } from 'react-native-paper';
 import { useIsFocused, useNavigation } from '@react-navigation/native';
 import Icon from './Icon';
 import { isDevice } from 'expo-device';
@@ -89,16 +89,10 @@ export const SaveEditModal = ({ isVisible, setVisible, media }: SaveEditModalPro
         style={styles.modal}
         contentContainerStyle={styles.modalView}>
         {isLoading && <Loading />}
-        <TextInput underlineColor='purple' mode='flat' label={'Name (optional)'}
-            style={styles.titleTextInput} value={title} onChangeText={setTitle} autoComplete='off'
-            theme={{
-                colors: {
-                    placeholder: 'purple', text: 'black', primary: 'purple',
-                    background: '#003489'
-                }
-            }} />
+        <TextInput placeholder='Add title'
+            style={styles.titleTextInput} value={title} onChangeText={setTitle} autoComplete='off' autoFocus />
         <View style={styles.row}>
-            <Button mode='outlined' icon='bell-outline' style={styles.notificationButton} onPress={() => {
+            <Button mode='outlined' icon='bell-outline' style={styles.button} onPress={() => {
                 if (NativeModules.RNDatePicker) {
                     if (date === undefined) setDate(new Date())
                     setDateOpen(true)
@@ -109,7 +103,7 @@ export const SaveEditModal = ({ isVisible, setVisible, media }: SaveEditModalPro
             {date && <IconButton icon="close" size={35} onPress={() => setDate(undefined)} />}
         </View>
         <View style={styles.row}>
-            <Button mode='outlined' icon='arrow-u-right-top' style={styles.notificationButton} onPress={() => setRepeatOpen(true)}>
+            <Button mode='outlined' icon='arrow-u-right-top' style={styles.button} onPress={() => setRepeatOpen(true)}>
                 {repeat ?? 'Does not repeat'}
             </Button>
         </View>
@@ -124,8 +118,13 @@ export const SaveEditModal = ({ isVisible, setVisible, media }: SaveEditModalPro
             onCancel={() => setDateOpen(false)}
         />}
         {isFocused && <RepeatPicker {...{ repeat, setRepeat, repeatOpen, setRepeatOpen }} />}
-        <View style={styles.buttonContainer}>
+        {/* <View style={styles.buttonContainer}> */}
+        <View style={styles.row}>
+
             <Button style={styles.button} color={'blue'} mode='contained' onPress={onPressSave}>Save</Button>
+        </View>
+        <View style={styles.row}>
+
             <Button style={styles.button} color={'gray'} mode='outlined' onPress={() => setVisible(false)}>Cancel</Button>
         </View>
     </Modal>
@@ -204,7 +203,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     modalView: {
-        opacity: 0.8,
+        opacity: 1,
         backgroundColor: 'white',
         borderRadius: 20,
         paddingTop: 20,
@@ -212,13 +211,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 30,
         alignItems: 'center',
         // minWidth: 200,
-    },
-    button: {
-        borderRadius: 5,
-        // padding: 10,
-        marginBottom: 15,
-        // width: '80%',
-        // elevation: 2,
     },
     buttonOpen: {
         backgroundColor: '#F194FF',
@@ -238,10 +230,11 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     titleTextInput: {
+        fontSize: 25,
         marginBottom: 15,
         textAlign: 'left',
         alignSelf: 'stretch',
-        backgroundColor: '#f9f9f9',
+        // backgroundColor: '#f9f9f9',
     },
     row: {
         flexDirection: 'row',
@@ -250,11 +243,10 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignSelf: 'stretch',
     },
-    buttonContainer: {
-        alignSelf: 'stretch'
-    },
-    notificationButton: {
+    button: {
         flex: 1,
+        borderColor: 'silver',
+        borderWidth: .8,
     },
     repeatModalContainer: {
         backgroundColor: 'white',
