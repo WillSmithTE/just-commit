@@ -13,16 +13,16 @@ import { RecordingsList } from '../components/RecordingsList';
 import { Text, View } from '../components/Themed';
 import { RootState } from '../services/reduxStore';
 import { setFeature } from '../services/settingsSlice';
-import { RootTabScreenProps } from '../types'
+import { Feature, RootTabScreenProps } from '../types'
 
 const features = [
   {
     label: 'Version 2: Save & Edit',
-    key: 'v2-save-edit',
+    key: Feature.VERSION_2_SAVE_EDIT,
   },
   {
-    label: 'Nothing',
-    key: 'nothing',
+    label: 'Version 2: Record Button',
+    key: Feature.VERSION_2_RECORD_BUTTON,
   },
 ]
 
@@ -76,7 +76,7 @@ export default function Settings({ }: RootTabScreenProps<'Record'>) {
             marginBottom: 20,
           }}>
             <Text style={{ color: 'white', fontSize: 16 }}>{feature.label}</Text>
-            <Switch value={feature.enabled} onValueChange={onToggleSwitch} ios_backgroundColor='#777a78' trackColor={{ false: '#777a78' }}/>
+            <Switch value={feature.enabled} onValueChange={onToggleSwitch} ios_backgroundColor='#777a78' trackColor={{ false: '#777a78' }} />
           </View>
         })}
       </ScrollView>

@@ -53,9 +53,12 @@ export const SaveEditModal = ({ isVisible, setVisible, media }: SaveEditModalPro
         }
 
         let mediaLibAsset: MediaLibrary.Asset
+        console.debug({isMyvid: isMyVideo(media), media: JSON.stringify(media, null, 2)})
         if (isMyVideo(media)) mediaLibAsset = media // if in edit mode
         else {
+            console.debug(2)
             mediaLibAsset = await MediaLibrary.createAssetAsync(media.uri)
+            console.log(JSON.stringify({newLibAsset: mediaLibAsset}, null, 2))
             media.deadline && await deleteOldNotification(media.deadline.id)
             if (Platform.OS === 'ios' && isDevice) mediaLibAsset.uri = convertLocalIdentifierToAssetLibrary(mediaLibAsset.uri, 'mov')
         }
@@ -136,7 +139,6 @@ type RepeatPickerProps = {
     setRepeatOpen: (open: boolean) => void,
 }
 const RepeatPicker = ({ repeat, setRepeat, repeatOpen, setRepeatOpen }: RepeatPickerProps) => {
-    console.log({ repeat })
     return <Portal>
         <Modal visible={repeatOpen} onDismiss={() => setRepeatOpen(false)} contentContainerStyle={styles.repeatModalContainer}>
             {repeatOptions.map(({ label }, i) =>

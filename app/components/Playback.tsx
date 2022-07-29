@@ -49,7 +49,6 @@ export const Playback = ({ route: { params: { media, inEditMode } } }: VideoPlay
         })()
     }, [])
     useEffect(() => {
-        console.debug(`status=${JSON.stringify(status, null, 2)}`)
         if (status?.isLoaded && status.didJustFinish) {
             playback!!.setPositionAsync(0)
             playback!!.pauseAsync()
@@ -135,11 +134,11 @@ export const Playback = ({ route: { params: { media, inEditMode } } }: VideoPlay
             status?.isLoaded ?
                 <>
                     <View style={styles.bottomRow}>
-                        <IconButton icon='delete' style={isNewMedia ? styles.invisibleButton : styles.trashButton} onPress={deleteMedia} color='white' size={50} />
-                        <TouchableOpacity onPress={() => console.log({ status, playback, type: media.type }) ||
+                        <IconButton icon='delete' style={isNewMedia ? styles.invisibleButton : styles.trashButton} onPress={_deleteMedia} color='white' size={50} />
+                        <TouchableOpacity onPress={() =>
                             status?.isPlaying ?
-                            playback!!.pauseAsync().catch(console.error)
-                            : playback!!.playAsync().catch(console.error)
+                                playback!!.pauseAsync().catch(console.error)
+                                : playback!!.playAsync().catch(console.error)
                         }>
                             {status.isPlaying ?
                                 <Icon family='Ionicons' name='pause-circle' color={PINK_COLOUR} size={90} /> :

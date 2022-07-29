@@ -23,6 +23,7 @@ export type RootStackParamList = {
     inEditMode?: boolean,
   };
   Settings: undefined
+  RecordFullscreen: undefined
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> = NativeStackScreenProps<
@@ -62,15 +63,25 @@ type Repeat = {
 }
 
 export function isMyVideo(video: AtLeast<MyMedia, 'uri'>): video is MyMedia {
+  console.debug(JSON.stringify(video, null, 2))
   return isMediaLibAsset(video)
 }
 
+const mediaLibAssetProps = ['id', 'duration', 'modificationTime', 'creationTime', 'height', 'width', 'mediaType', 'uri', 'filename']
+
 function isMediaLibAsset(asset: { [prop: string]: any }): asset is MediaLibrary.Asset {
-  ['id', 'duration', 'modificationTime', 'creationTime', 'height', 'width', 'mediaType', 'uri', 'filename']
-    .forEach((assetProp) => { if (asset[assetProp] === undefined) return false })
-  return true
+  return mediaLibAssetProps
+    .every((assetProp) => {
+      return asset[assetProp] !== undefined
+    })
 }
 
 
 export type AtLeast<T, K extends keyof T> = Partial<T> & Pick<T, K>
 export type AtLeast2<T, K extends keyof T, J extends keyof T> = Partial<T> & Pick<T, K> & Pick<T, J>
+
+export enum Feature {
+  VERSION_2_SAVE_EDIT = 'v2-save-edit',
+  NOTHING = 'nothing',
+  VERSION_2_RECORD_BUTTON = 'v2-record-button'
+}

@@ -12,7 +12,7 @@ import { ColorSchemeName } from 'react-native';
 import useColorScheme from '../hooks/useColorScheme';
 import NotFoundScreen from '../screens/NotFoundScreen';
 import RecordScreen from '../screens/Record';
-import { MyMedia, RootStackParamList, RootTabParamList, RootTabScreenProps } from '../types';
+import { Feature, MyMedia, RootStackParamList, RootTabParamList, RootTabScreenProps } from '../types';
 import Icon, { IC } from '../components/Icon';
 import Home from '../screens/Home';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -25,6 +25,7 @@ import { RootState } from '../services/reduxStore';
 import { showError } from '../components/Error';
 import Groups from '../screens/Groups';
 import Settings from '../screens/Settings';
+import { IconButton } from 'react-native-paper';
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
   return (
@@ -64,6 +65,7 @@ function RootNavigator() {
     <Stack.Navigator>
       <Stack.Screen name="Root" component={BottomTabNavigator} options={{ headerShown: false }} />
       <Stack.Screen name="Playback" component={Playback} options={{ headerShown: false }} />
+      <Stack.Screen name="RecordFullscreen" component={RecordScreen} options={{ headerShown: false }} />
       <Stack.Screen name="NotFound" component={NotFoundScreen} options={{ title: 'Oops!' }} />
     </Stack.Navigator>
   );
@@ -76,16 +78,18 @@ function RootNavigator() {
 const BottomTab = createBottomTabNavigator<RootTabParamList>();
 
 function BottomTabNavigator() {
+  const features = useSelector((state: RootState) => state.settings.features)
+  const isRecordButtonV2 = features[Feature.VERSION_2_RECORD_BUTTON]
   const colorScheme = useColorScheme();
 
   return (
     <SafeAreaProvider>
       <BottomTab.Navigator
         initialRouteName="Home"
-        screenOptions={{
+        screenOptions={({ navigation }) => ({
           tabBarActiveTintColor: BLUE_COLOUR,
           headerShown: false,
-        }}
+        })}
       >
         {/* <BottomTab.Screen
           name="Home"
@@ -105,7 +109,11 @@ function BottomTabNavigator() {
           name="Record"
           component={RecordScreen}
           options={({ navigation }: RootTabScreenProps<'Record'>) => ({
-            tabBarIcon: ({ color }) => <TabBarIcon name="record-circle" family='MaterialCommunityIcons' color={color} />,
+            tabBarLabelStyle: isRecordButtonV2 && { display: 'none' },
+            // tabBarIcon: ({ color }) => <TabBarIcon name="record-circle" family='MaterialCommunityIcons' color={color} />,
+            tabBarIcon: isRecordButtonV2 ?
+              ({ color }) => <IconButton icon='plus-box' color='white' size={50} onPress={() => navigation.navigate('RecordFullscreen')} /> :
+              ({ color }) => <TabBarIcon name="record-circle" family='MaterialCommunityIcons' color={color} />,
           })}
         />
         <BottomTab.Screen

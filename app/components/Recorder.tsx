@@ -2,7 +2,7 @@ import * as React from 'react';
 import { View, StyleSheet, ImageBackground, Text } from 'react-native';
 import { useEffect, useState } from 'react';
 import { Camera, CameraType, VideoCodec } from 'expo-camera';
-import { NavigationProp, ParamListBase } from '@react-navigation/native';
+import { NavigationProp, ParamListBase, useNavigation } from '@react-navigation/native';
 import { useIsFocused } from '@react-navigation/native';
 import * as Device from 'expo-device';
 import { StartRecordingIcon } from './StartRecordingIcon';
@@ -10,6 +10,10 @@ import { FAB, IconButton, Portal, Provider } from 'react-native-paper';
 import { showMessage } from 'react-native-flash-message';
 import { Audio } from 'expo-av';
 import { showError2 } from './Error';
+import { useSelector } from 'react-redux';
+import { RootState } from '../services/reduxStore';
+import { useFeature } from '../hooks/useFeature';
+import { Feature } from '../types';
 
 type Mode = 'video' | 'audio'
 type ModePickerState = {
@@ -26,6 +30,7 @@ export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListB
     const [audioRecording, setAudioRecording] = React.useState<Audio.Recording | undefined>();
     const [mode, setMode] = React.useState<Mode>('video');
     const [modePickerOpen, setModePickerOpen] = React.useState(false)
+    const isV2Record = useFeature(Feature.VERSION_2_RECORD_BUTTON)
 
     useEffect(() => {
         if (mode === 'video')
@@ -108,6 +113,21 @@ export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListB
         <View>
             {isFocused && <ModePicker open={modePickerOpen} setOpen={setModePickerOpen} mode={mode} setMode={setMode} />}
         </View>
+        {isV2Record && <IconButton
+            onPress={() => navigation.goBack()}
+            icon='close'
+            color='white'
+            size={40}
+            style={{
+                shadowOffset: { width: 0, height: 0 },
+                shadowColor: 'black',
+                shadowOpacity: .7,
+                position: 'absolute',
+                top: 30,
+                left: 10,
+            }}
+        />}
+
         <View style={styles.bottomRow}>
             <View style={styles.buttonContainer}>
 
@@ -210,15 +230,15 @@ const modeIcon = (mode: Mode) => ({
 }[mode])
 
 const ModePicker = ({ mode, setMode, open, setOpen }: ModePickerProps) => {
+    const isFocused = useIsFocused();
 
+    const v2Record = useFeature(Feature.VERSION_2_RECORD_BUTTON)
     return (
-        // <View style={{ flex: 1, position: 'absolute', bottom: 0 }}>
-        // <Provider>
         <Portal>
             <FAB.Group
-                fabStyle={fabStyles.fabStyle}
-                style={fabStyles.groupStyle}
-                // style={{ position: 'absolute' }}
+                visible={isFocused}
+                fabStyle={fabStyles(v2Record).fabStyle}
+                style={fabStyles(v2Record).groupStyle}
                 open={open}
                 icon={open ? 'plus' : modeIcon(mode)}
                 actions={modes.map((mode) => ({
@@ -228,13 +248,12 @@ const ModePicker = ({ mode, setMode, open, setOpen }: ModePickerProps) => {
                 onStateChange={({ open: newOpen }) => setOpen(newOpen)}
             />
         </Portal>
-        // </Provider>
     );
 };
 
-const fabStyles = StyleSheet.create({
+const fabStyles = (v2Record: boolean) => StyleSheet.create({
     fabStyle: {
-        marginBottom: 80,
+        marginBottom: v2Record ? 30 : 80,
         marginLeft: 30,
         left: 0,
         bottom: 0,
