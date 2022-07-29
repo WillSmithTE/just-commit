@@ -50,5 +50,8 @@ DONE- it's a NAME not a title
 - save modal looks ugly
 - why just loading on playback after tap? need to do the error handling
 DONE- close on new recording is invisible against koala
-- groups section
-- no home. on lib can filter
+DONE- groups section
+DONE- no home
+- on lib can filter
+DONE- settings for feature flags
+- mark as done on home with tick or toggle (spotify downloads?)

@@ -12,6 +12,7 @@ import {
   PURGE,
   REGISTER,
 } from "redux-persist";
+import { settingsReducer } from './settingsSlice';
 
 const persistConfig = {
   key: 'root',
@@ -23,6 +24,7 @@ const persistConfig = {
 const rootReducer = combineReducers({
   media: mediaReducer,
   selectedMedia: selectedMediaReducer,
+  settings: settingsReducer,
 })
 
 const persistedReducer = persistReducer(persistConfig, rootReducer)

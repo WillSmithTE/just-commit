@@ -132,7 +132,7 @@ export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListB
                 </Camera> :
                 <ImageBackground
                     style={{ flex: 1 }}
-                    source={require('../assets/images/roland-kay-smith-GBKpO-rJecg-unsplash.jpg')}>
+                    source={require('../assets/images/snow.png')}>
                     {insideElements}
                 </ImageBackground >
             }

@@ -114,7 +114,7 @@ export const Playback = ({ route: { params: { media, inEditMode } } }: VideoPlay
         {media.type === 'audio' && <ImageBackground
             // style={{ flex: 1 }}
             style={styles.video}
-            source={require('../assets/images/roland-kay-smith-GBKpO-rJecg-unsplash.jpg')}>
+            source={require('../assets/images/snow.png')}>
             {/* {insideElements} */}
         </ImageBackground >
         }

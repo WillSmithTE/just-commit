@@ -66,7 +66,7 @@ const AppInternals = () => {
     <QueryClientProvider client={queryClient}>
       <Navigation colorScheme={colorScheme} />
       <StatusBar />
-      <FlashMessage position='bottom' />
+      <FlashMessage position='bottom' duration={3000} style={{alignItems: 'center'}}/>
     </QueryClientProvider>
   );
 }

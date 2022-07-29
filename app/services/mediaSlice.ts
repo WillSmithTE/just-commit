@@ -11,6 +11,11 @@ const initialState: MediaState = {
     medias: undefined,
 }
 
+type MediaDonePayload = {
+    id: string,
+    done: boolean,
+}
+
 export const mediaSlice = createSlice({
     name: 'media',
     initialState,
@@ -40,18 +45,18 @@ export const mediaSlice = createSlice({
                 state.medias!!.splice(index, 1)
             }
         },
-        setMediaAsDone: (state, action: PayloadAction<string>) => {
-            console.debug(`setting media done (id=${action.payload})`)
-            const index = state?.medias?.findIndex(({ id }) => action.payload === id)
+        setMediaDone: (state, action: PayloadAction<MediaDonePayload>) => {
+            console.debug(`setting media done (id=${action.payload.id}, done=${action.payload.done})`)
+            const index = state?.medias?.findIndex(({ id }) => action.payload.id === id)
             if (index === -1 || index === undefined) {
                 showError(`can't mark done, media not found (id=${action.payload})`)
             } else {
-                state.medias!![index].isDone = true
+                state.medias!![index].isDone = action.payload.done
             }
         },
     },
 })
 
-export const { upsertMedia, deleteMedia, setMediaAsDone } = mediaSlice.actions
+export const { upsertMedia, deleteMedia, setMediaDone } = mediaSlice.actions
 
 export const mediaReducer = mediaSlice.reducer

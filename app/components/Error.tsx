@@ -8,3 +8,6 @@ export const showError2 = (options: MessageOptions) => {
     console.error(options.message)
     showMessage({ ...options, type: 'danger' })
 }
+
+export const showComingSoon = () => { showMessage({ message: 'Coming soon!', type: 'success' }) }
+

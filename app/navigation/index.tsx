@@ -24,6 +24,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../services/reduxStore';
 import { showError } from '../components/Error';
 import Groups from '../screens/Groups';
+import Settings from '../screens/Settings';
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
   return (
@@ -95,7 +96,7 @@ function BottomTabNavigator() {
         /> */}
         <BottomTab.Screen
           name="Library"
-          component={Library}
+          component={LibraryStackScreen}
           options={({ navigation }: RootTabScreenProps<'Library'>) => ({
             tabBarIcon: ({ color }) => <TabBarIcon name="library" family='Ionicons' color={color} />,
           })}
@@ -125,4 +126,17 @@ function TabBarIcon(props: {
   family?: IC['family'];
 }) {
   return <Icon family={props.family} props={{ size: 30, style: { marginBottom: 0, paddingTop: 5 }, ...props }} color={props.color} />;
+}
+
+const LibraryStack = createNativeStackNavigator();
+
+function LibraryStackScreen() {
+  return (
+    <LibraryStack.Navigator screenOptions={{
+      headerShown: false,
+    }}>
+      <LibraryStack.Screen name="MainLibrary" component={Library} />
+      <LibraryStack.Screen name="Settings" component={Settings} />
+    </LibraryStack.Navigator >
+  );
 }

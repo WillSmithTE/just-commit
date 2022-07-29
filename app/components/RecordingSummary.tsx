@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, Image, Alert } from 'react-native';
 import { MyMedia } from '../types';
 import { secondsToMin } from '../services/timeUtil';
 import { Audio } from 'expo-av';
@@ -7,8 +7,9 @@ import { useNavigation } from '@react-navigation/native';
 import { Button, Divider, IconButton, Menu } from 'react-native-paper';
 import { BLUE_COLOUR } from '../constants';
 import { useDispatch } from 'react-redux';
-import { deleteMedia, setMediaAsDone } from '../services/mediaSlice';
+import { deleteMedia, setMediaDone } from '../services/mediaSlice';
 import { showMessage, hideMessage } from "react-native-flash-message";
+import { showComingSoon } from './Error';
 
 export const RecordingSummary = ({ media, }: { media: MyMedia }) => {
     const [isMenuVisible, setIsMenuVisible] = React.useState(false);
@@ -16,6 +17,7 @@ export const RecordingSummary = ({ media, }: { media: MyMedia }) => {
     const [sound, setSound] = React.useState<Audio.Sound | undefined>();
     const [isPlaying, setIsPlaying] = React.useState(false);
     const navigation = useNavigation();
+    const dispatch = useDispatch()
 
     const finish = () => {
         setIsPlaying(false)
@@ -28,6 +30,11 @@ export const RecordingSummary = ({ media, }: { media: MyMedia }) => {
             ? finish
             : undefined;
     }, [sound]);
+
+    const onPressDone = () => {
+        dispatch(setMediaDone({ id: media.id, done: !media.isDone }))
+        showMessage({ message: `Done! You're a star ✨`, type: 'success' })
+    }
 
     return (
         <TouchableOpacity onPress={() => navigation.navigate('Playback', { media })} >
@@ -43,10 +50,11 @@ export const RecordingSummary = ({ media, }: { media: MyMedia }) => {
                     </View>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                         <Text style={styles.duration}>{timeDisplay(media)}</Text>
-                        <Text style={styles.duration}>{secondsToMin(media.duration)}</Text>
+                        {/* <Text style={styles.duration}>{secondsToMin(media.duration)}</Text> */}
                     </View>
                 </View>
-                <View>
+                <View style={{ flexDirection: 'row' }}>
+                    <IconButton icon={media.isDone ? 'check-circle' : 'check-circle-outline'} size={22} onPress={onPressDone} color='green' style={{ paddingTop: 10 }} />
                     <SummaryMenu media={media} open={() => setIsMenuVisible(true)} close={() => setIsMenuVisible(false)} isVisible={isMenuVisible} />
                 </View>
             </View>
@@ -61,8 +69,6 @@ type SummaryMenuProps = {
     media: MyMedia,
 }
 
-const comingSoon = () => { showMessage({ message: 'Coming soon!', type: 'success' }) }
-
 const SummaryMenu = ({ media, open, close, isVisible }: SummaryMenuProps) => {
     const navigation = useNavigation()
 
@@ -70,9 +76,13 @@ const SummaryMenu = ({ media, open, close, isVisible }: SummaryMenuProps) => {
         close()
         navigation.navigate('Playback', { media: media, inEditMode: true })
     }
-    const onDone = () => {
-        dispatch(setMediaAsDone(media.id))
-        showMessage({ message: `Done! You're a star ✨`, type: 'success' })
+    const onDelete = () => {
+        close()
+        Alert.alert(
+            'Are you sure?', undefined, [
+            { text: 'Cancel', style: 'cancel', onPress: () => { }, },
+            { text: 'Delete', onPress: () => dispatch(deleteMedia(media.id)) },
+        ], { cancelable: true })
     }
     const dispatch = useDispatch()
 
@@ -81,10 +91,9 @@ const SummaryMenu = ({ media, open, close, isVisible }: SummaryMenuProps) => {
             visible={isVisible}
             onDismiss={close}
             anchor={<IconButton icon="dots-vertical" onPress={open} color={BLUE_COLOUR}></IconButton>}>
-            <Menu.Item icon="check" onPress={onDone} title="Done" />
             <Menu.Item icon="pencil-box-outline" onPress={onEdit} title="Edit" />
-            <Menu.Item icon="share" onPress={comingSoon} title="Share" />
-            <Menu.Item icon="delete" onPress={() => dispatch(deleteMedia(media.id))} title="Delete" />
+            <Menu.Item icon="share" onPress={showComingSoon} title="Share" />
+            <Menu.Item icon="delete" onPress={onDelete} title="Delete" />
         </Menu>
     </>
 }
@@ -123,7 +132,7 @@ const styles = StyleSheet.create({
 const willsmithImageSource = require('../assets/images/willsmith.png');
 
 function timeDisplay(media: MyMedia): string {
-    const time = media.notificationDate ?? media.creationTime
+    const time = media.deadline?.date ?? media.creationTime
     return new Date(time).toLocaleString()
 }
 function titleDisplay(media: MyMedia): string {

@@ -22,6 +22,7 @@ export type RootStackParamList = {
     media: AtLeast<MyMedia, 'uri'>,
     inEditMode?: boolean,
   };
+  Settings: undefined
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> = NativeStackScreenProps<

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Text, View, StyleSheet, Platform, Alert } from 'react-native';
+import { Text, View, StyleSheet, Platform, Alert, NativeModules, TouchableOpacity } from 'react-native';
 import { useEffect, useState } from 'react';
 import DatePicker from 'react-native-date-picker'
 import * as MediaLibrary from 'expo-media-library';
@@ -13,6 +13,7 @@ import { Button, IconButton, Modal, Portal, RadioButton, TextInput, } from 'reac
 import { useIsFocused, useNavigation } from '@react-navigation/native';
 import Icon from './Icon';
 import { isDevice } from 'expo-device';
+import { showMessage } from 'react-native-flash-message';
 
 type SaveEditModalProps = {
     isVisible: boolean,
@@ -31,7 +32,7 @@ export const SaveEditModal = ({ isVisible, setVisible, media }: SaveEditModalPro
     const dispatch = useDispatch()
     const navigation = useNavigation();
     const isNewMode = () => isMyVideo(media)
-    const [repeat, setRepeat] = useState<string>((media.repeat ?? repeatOptions[0]).label)
+    const [repeat, setRepeat] = useState<string>(media.repeat?.label ?? repeatOptions[0].label)
     const [repeatOpen, setRepeatOpen] = useState(false)
     const isFocused = useIsFocused();
 
@@ -95,8 +96,12 @@ export const SaveEditModal = ({ isVisible, setVisible, media }: SaveEditModalPro
             }} />
         <View style={styles.row}>
             <Button mode='outlined' icon='bell-outline' style={styles.notificationButton} onPress={() => {
-                if (date === undefined) setDate(new Date())
-                setDateOpen(true)
+                if (NativeModules.RNDatePicker) {
+                    if (date === undefined) setDate(new Date())
+                    setDateOpen(true)
+                } else {
+                    showMessage({ message: 'Need a native install for that, sorry', type: 'info' })
+                }
             }}>{date ? date.toLocaleString() : 'Add deadline'}</Button>
             {date && <IconButton icon="close" size={35} onPress={() => setDate(undefined)} />}
         </View>
@@ -131,15 +136,14 @@ type RepeatPickerProps = {
     setRepeatOpen: (open: boolean) => void,
 }
 const RepeatPicker = ({ repeat, setRepeat, repeatOpen, setRepeatOpen }: RepeatPickerProps) => {
+    console.log({ repeat })
     return <Portal>
         <Modal visible={repeatOpen} onDismiss={() => setRepeatOpen(false)} contentContainerStyle={styles.repeatModalContainer}>
             {repeatOptions.map(({ label }, i) =>
-                <Button onPress={() => { setRepeat(label); setRepeatOpen(false) }} key={i}>
-                    <View style={styles.repeatOption} >
-                        <RadioButton.Android value={label} status={repeat === label ? 'checked' : 'unchecked'} />
-                        <Text>{label}</Text>
-                    </View>
-                </Button>
+                <TouchableOpacity style={{ flexDirection: 'row' }} key={i} onPress={() => { setRepeat(label); setRepeatOpen(false) }}>
+                    <RadioButton.Android value={label} status={repeat === label ? 'checked' : 'unchecked'} uncheckedColor='#777a78' />
+                    <Text style={{ color: 'black', alignSelf: 'center' }}>{label}</Text>
+                </TouchableOpacity>
             )}
         </Modal>
     </Portal>
@@ -261,5 +265,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         padding: 5,
         alignItems: 'center',
+        color: 'black',
+        fontSize: 10
     }
 })  
