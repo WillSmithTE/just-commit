@@ -19,7 +19,7 @@ export type RootStackParamList = {
   Modal: undefined;
   NotFound: undefined;
   Playback: {
-    video: AtLeast<MyVideo, 'uri'>,
+    media: AtLeast<MyMedia, 'uri'>,
     inEditMode?: boolean,
   };
 };
@@ -33,6 +33,7 @@ export type RootTabParamList = {
   Library: undefined;
   Home: undefined;
   Record: undefined;
+  Groups: undefined;
 };
 
 export type RootTabScreenProps<Screen extends keyof RootTabParamList> = CompositeScreenProps<
@@ -40,11 +41,14 @@ export type RootTabScreenProps<Screen extends keyof RootTabParamList> = Composit
   NativeStackScreenProps<RootStackParamList>
 >;
 
-export type MyVideo = MediaLibrary.Asset & {
+export type MyMedia = MediaLibrary.Asset & {
   title?: string,
   deadline?: MyNotification,
   reminders?: MyNotification[],
   isNotificationAcknowledged?: boolean,
+  type: 'audio' | 'video',
+  isDone?: boolean,
+  repeat?: Repeat
 }
 
 type MyNotification = {
@@ -52,7 +56,11 @@ type MyNotification = {
   id: string,
 }
 
-export function isMyVideo(video: AtLeast<MyVideo, 'uri'>): video is MyVideo {
+type Repeat = {
+  label: string,
+}
+
+export function isMyVideo(video: AtLeast<MyMedia, 'uri'>): video is MyMedia {
   return isMediaLibAsset(video)
 }
 
@@ -64,3 +72,4 @@ function isMediaLibAsset(asset: { [prop: string]: any }): asset is MediaLibrary.
 
 
 export type AtLeast<T, K extends keyof T> = Partial<T> & Pick<T, K>
+export type AtLeast2<T, K extends keyof T, J extends keyof T> = Partial<T> & Pick<T, K> & Pick<T, J>

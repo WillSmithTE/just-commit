@@ -1,9 +1,9 @@
-import { MyVideo } from "../types"
+import { MyMedia } from "../types"
 import { AppStorage } from "./AppStorage"
 import * as MediaLibrary from 'expo-media-library';
 
 export const api = {
-    getRecordings: async function (): Promise<MyVideo[]> {
+    getRecordings: async function (): Promise<MyMedia[]> {
         console.debug(`getRecordings`)
         try {
             const songs = await AppStorage.getVideos()
@@ -13,7 +13,7 @@ export const api = {
             return Promise.reject(e)
         }
     },
-    saveVideo: async function ({ video }: { video: MyVideo }): Promise<MyVideo> {
+    saveVideo: async function ({ video }: { video: MyMedia }): Promise<MyMedia> {
         console.debug(`saveVideo (id=${video.id})`)
         try {
             await AppStorage.saveVideo(video)
@@ -24,7 +24,7 @@ export const api = {
             return Promise.reject(e)
         }
     },
-    deleteVideo: async function (video: MyVideo): Promise<void> {
+    deleteVideo: async function (video: MyMedia): Promise<void> {
         await MediaLibrary.deleteAssetsAsync(video)
         await AppStorage.deleteVideo(video.id)
         console.debug(`deleted song (id=${video.id})`)

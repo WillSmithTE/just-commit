@@ -12,17 +12,18 @@ import { ColorSchemeName } from 'react-native';
 import useColorScheme from '../hooks/useColorScheme';
 import NotFoundScreen from '../screens/NotFoundScreen';
 import RecordScreen from '../screens/Record';
-import { MyVideo, RootStackParamList, RootTabParamList, RootTabScreenProps } from '../types';
+import { MyMedia, RootStackParamList, RootTabParamList, RootTabScreenProps } from '../types';
 import Icon, { IC } from '../components/Icon';
 import Home from '../screens/Home';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { BLUE_COLOUR } from '../constants';
-import { VideoPlayback } from '../components/VideoPlayback';
+import { Playback } from '../components/Playback';
 import { useLastNotificationResponse, DEFAULT_ACTION_IDENTIFIER } from 'expo-notifications';
 import Library from '../screens/Library';
 import { useSelector } from 'react-redux';
 import { RootState } from '../services/reduxStore';
 import { showError } from '../components/Error';
+import Groups from '../screens/Groups';
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
   return (
@@ -52,7 +53,7 @@ function RootNavigator() {
     ) {
       const id = lastNotificationResponse.notification.request.content.data.id as string
       const video = medias?.find((saved) => saved.id === id)
-      if (video) navigation.navigate('Playback', { video })
+      if (video) navigation.navigate('Playback', { media: video })
       else showError(`tried to nav from notification but media not found (id=${id})`)
     }
   }, [lastNotificationResponse]);
@@ -61,7 +62,7 @@ function RootNavigator() {
   return (
     <Stack.Navigator>
       <Stack.Screen name="Root" component={BottomTabNavigator} options={{ headerShown: false }} />
-      <Stack.Screen name="Playback" component={VideoPlayback} options={{ headerShown: false }} />
+      <Stack.Screen name="Playback" component={Playback} options={{ headerShown: false }} />
       <Stack.Screen name="NotFound" component={NotFoundScreen} options={{ title: 'Oops!' }} />
     </Stack.Navigator>
   );
@@ -85,11 +86,18 @@ function BottomTabNavigator() {
           headerShown: false,
         }}
       >
-        <BottomTab.Screen
+        {/* <BottomTab.Screen
           name="Home"
           component={Home}
           options={({ navigation }: RootTabScreenProps<'Home'>) => ({
             tabBarIcon: ({ color }) => <TabBarIcon name="home" family='Ionicons' color={color} />,
+          })}
+        /> */}
+        <BottomTab.Screen
+          name="Library"
+          component={Library}
+          options={({ navigation }: RootTabScreenProps<'Library'>) => ({
+            tabBarIcon: ({ color }) => <TabBarIcon name="library" family='Ionicons' color={color} />,
           })}
         />
         <BottomTab.Screen
@@ -100,10 +108,10 @@ function BottomTabNavigator() {
           })}
         />
         <BottomTab.Screen
-          name="Library"
-          component={Library}
-          options={({ navigation }: RootTabScreenProps<'Library'>) => ({
-            tabBarIcon: ({ color }) => <TabBarIcon name="library" family='Ionicons' color={color} />,
+          name="Groups"
+          component={Groups}
+          options={({ navigation }: RootTabScreenProps<'Groups'>) => ({
+            tabBarIcon: ({ color }) => <TabBarIcon name="account-group" family='MaterialCommunityIcons' color={color} />,
           })}
         />
       </BottomTab.Navigator>

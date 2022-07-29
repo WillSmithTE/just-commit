@@ -7,7 +7,7 @@ import { useDispatch } from 'react-redux';
 import { RecordingsList } from '../components/RecordingsList';
 import { Text, View } from '../components/Themed';
 import { upsertMedia } from '../services/mediaSlice';
-import { RootTabScreenProps } from '../types'
+import { MyMedia, RootTabScreenProps } from '../types'
 
 export default function Home({ navigation }: RootTabScreenProps<'Home'>) {
   const oneWeekInFuture = new Date(new Date().getDate() + 7)
@@ -25,6 +25,7 @@ export default function Home({ navigation }: RootTabScreenProps<'Home'>) {
         modificationTime: 20,
         uri: '1234',
         width: 10,
+        type: 'audio',
       }))
       dispatch(upsertMedia({
         creationTime: 1,
@@ -36,6 +37,7 @@ export default function Home({ navigation }: RootTabScreenProps<'Home'>) {
         modificationTime: 20,
         uri: '1234',
         width: 10,
+        type: 'video',
       }))
     }
   })
@@ -43,7 +45,7 @@ export default function Home({ navigation }: RootTabScreenProps<'Home'>) {
     <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.container}>
         <Text style={styles.title}>Hej hej</Text>
-        <RecordingsList timeUntil={oneWeekInFuture} />
+        <RecordingsList shouldDisplayItem={(media: MyMedia) => !media.isDone} />
       </View>
     </SafeAreaView>
   );

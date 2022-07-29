@@ -1,9 +1,10 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { MyVideo } from '../types'
+import { showError } from '../components/Error'
+import { MyMedia } from '../types'
 import { api } from './api'
 
 export interface MediaState {
-    medias: MyVideo[] | undefined
+    medias: MyMedia[] | undefined
 }
 
 const initialState: MediaState = {
@@ -14,12 +15,10 @@ export const mediaSlice = createSlice({
     name: 'media',
     initialState,
     reducers: {
-        upsertMedia: (state, action: PayloadAction<MyVideo>) => {
+        upsertMedia: (state, action: PayloadAction<MyMedia>) => {
             console.debug(`upserting (${JSON.stringify({ new: action.payload, current: state.medias }, null, 2)})`)
             if (state.medias) {
-                console.debug(1)
                 const index = state?.medias?.findIndex(({ id }) => action.payload.id === id)
-                console.debug({index})
                 if (index === -1) {
                     state.medias = [action.payload].concat(state.medias)
                 } else {
@@ -41,9 +40,18 @@ export const mediaSlice = createSlice({
                 state.medias!!.splice(index, 1)
             }
         },
+        setMediaAsDone: (state, action: PayloadAction<string>) => {
+            console.debug(`setting media done (id=${action.payload})`)
+            const index = state?.medias?.findIndex(({ id }) => action.payload === id)
+            if (index === -1 || index === undefined) {
+                showError(`can't mark done, media not found (id=${action.payload})`)
+            } else {
+                state.medias!![index].isDone = true
+            }
+        },
     },
 })
 
-export const { upsertMedia, deleteMedia } = mediaSlice.actions
+export const { upsertMedia, deleteMedia, setMediaAsDone } = mediaSlice.actions
 
 export const mediaReducer = mediaSlice.reducer

@@ -1,10 +1,10 @@
 import { VIDEO_STORE_KEY } from "../constants"
-import { MyVideo } from "../types"
+import { MyMedia } from "../types"
 import { getJson, storeJson } from "./nativeStorage"
 
 export const AppStorage = {
 
-	saveVideo: async (item: MyVideo) => {
+	saveVideo: async (item: MyMedia) => {
 		const saved = await getJson(VIDEO_STORE_KEY)
 		const newList = saved === null ? [item] : [item, ...saved]
 		await storeJson(VIDEO_STORE_KEY, newList)

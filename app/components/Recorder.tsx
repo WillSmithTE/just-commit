@@ -1,13 +1,21 @@
 import * as React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, ImageBackground, Text } from 'react-native';
 import { useEffect, useState } from 'react';
 import { Camera, CameraType, VideoCodec } from 'expo-camera';
 import { NavigationProp, ParamListBase } from '@react-navigation/native';
 import { useIsFocused } from '@react-navigation/native';
 import * as Device from 'expo-device';
 import { StartRecordingIcon } from './StartRecordingIcon';
-import { FAB, IconButton, Portal } from 'react-native-paper';
+import { FAB, IconButton, Portal, Provider } from 'react-native-paper';
 import { showMessage } from 'react-native-flash-message';
+import { Audio } from 'expo-av';
+import { showError2 } from './Error';
+
+type Mode = 'video' | 'audio'
+type ModePickerState = {
+    open: boolean,
+    mode: Mode,
+}
 
 export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListBase, string, any, any> }) => {
     const [isRecording, setIsRecording] = useState(false)
@@ -15,21 +23,34 @@ export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListB
     const [type, setType] = useState(CameraType.back);
     const [camera, setCamera] = useState<Camera | undefined>();
     const isFocused = useIsFocused();
+    const [audioRecording, setAudioRecording] = React.useState<Audio.Recording | undefined>();
+    const [mode, setMode] = React.useState<Mode>('video');
+    const [modePickerOpen, setModePickerOpen] = React.useState(false)
 
     useEffect(() => {
-        (async () => {
-            const { status: cameraStatus } = await Camera.requestCameraPermissionsAsync();
-            const { status: audioStatus } = await Camera.requestMicrophonePermissionsAsync();
-            setHasPermission(cameraStatus === 'granted' && audioStatus === 'granted');
-        })();
-    }, []);
+        if (mode === 'video')
+            (async () => {
+                const { status: cameraStatus } = await Camera.requestCameraPermissionsAsync();
+                const { status: audioStatus } = await Camera.requestMicrophonePermissionsAsync();
+                setHasPermission(cameraStatus === 'granted' && audioStatus === 'granted');
+            })();
+        else
+            (async () => await Audio.requestPermissionsAsync())()
+    }, [mode]);
 
     const startRecording = async () => {
-        console.debug('starting recording')
+        if (mode === 'video') {
+            startVideoRecording()
+        } else {
+            startAudioRecording()
+        }
+    }
+
+    const startVideoRecording = async () => {
+        console.debug('starting video recording')
         const startRecordingTime = new Date()
-        console.debug({startRecordingTime: startRecordingTime.getTime()})
+        console.debug({ startRecordingTime: startRecordingTime.getTime() })
         if (Device.isDevice) {
-            // setTimeout(() => setIsRecording(true), 200)
             setTimeout(() => setIsRecording(true), 200)
             const recording = await camera!!.recordAsync() //({ codec: VideoCodec.JPEG, quality: '720p' })
             const recordingTime = (new Date()).getTime() - startRecordingTime?.getTime()
@@ -37,51 +58,86 @@ export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListB
             if (recordingTime < 2000) {
                 showMessage({ message: `You'll have to hold it longer, sorry!`, description: 'Video too short', type: 'info' })
             } else {
-                navigation.navigate('Playback', { video: { uri: recording.uri } })
+                navigation.navigate('Playback', { media: { uri: recording.uri, type: mode } })
             }
         } else {
             console.log('emulator, skipping recording')
-            navigation.navigate('Playback', { video: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4', inEditMode: true })
+            navigation.navigate('Playback', { media: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4', inEditMode: true, type: mode })
+        }
+    }
+
+    async function startAudioRecording() {
+        try {
+            await Audio.setAudioModeAsync({
+                allowsRecordingIOS: true,
+                playsInSilentModeIOS: true,
+            });
+            const { recording } = await Audio.Recording.createAsync(Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY)
+            setIsRecording(true)
+            setAudioRecording(recording)
+        } catch (err) {
+            showError2({ message: 'Failed to start recording', description: err as string });
         }
     }
 
     const stopRecording = async () => {
+        setIsRecording(false)
         console.debug('stopping recording')
+        if (mode === 'video') stopVideoRecording()
+        else stopAudioRecording()
+    }
+    const stopVideoRecording = () => {
         camera!!.stopRecording();
         setIsRecording(false)
+    }
+
+    async function stopAudioRecording() {
+        await audioRecording!!.stopAndUnloadAsync();
+        const uri = audioRecording!!.getURI();
+        console.log(`Recording stopped (uri=${uri})`);
+        setAudioRecording(undefined)
+        navigation.navigate('Playback', { media: { uri, type: mode } })
     }
 
     if (hasPermission === null) {
         console.error(`no permissions for camera recording`)
         return <View />;
     }
-    const [modePickerState, setModePickerState] = React.useState({ open: false });
+
+    const insideElements = <>
+        <View>
+            {isFocused && <ModePicker open={modePickerOpen} setOpen={setModePickerOpen} mode={mode} setMode={setMode} />}
+        </View>
+        <View style={styles.bottomRow}>
+            <View style={styles.buttonContainer}>
+
+                <IconButton icon='video-box' color='white' size={35} style={[styles.invisibleButton, styles.leftButton]} />
+            </View>
+            <View style={styles.buttonContainer}>
+                <StartRecordingIcon start={startRecording} stop={stopRecording} isRecording={isRecording} />
+            </View>
+            <View style={styles.buttonContainer}>
+                <IconButton icon='camera-flip' color='white' size={35} style={[styles.rightButton, mode === 'audio' && styles.invisibleButton]}
+                    onPress={() => {
+                        setType(type === CameraType.back ? CameraType.front : CameraType.back);
+                    }} />
+            </View>
+        </View></>
 
     return (
         <>
-            {isFocused && <Camera style={styles.camera} type={type} ref={ref => setCamera(ref!!)} onCameraReady={() => console.log('ready now')}>
-                <View>
-                    <ModePicker state={modePickerState} setState={setModePickerState} />
-                </View>
-                <View style={styles.bottomRow}>
-                    <View style={styles.buttonContainer}>
-
-                        <IconButton icon='video-box' color='white' size={35} style={styles.invisibleButton} />
-                    </View>
-                    <View style={styles.buttonContainer}>
-                        <StartRecordingIcon start={startRecording} stop={stopRecording} isRecording={isRecording} />
-                    </View>
-                    <View style={styles.buttonContainer}>
-                        <IconButton icon='camera-flip' color='white' size={35} style={styles.flipButton}
-                            onPress={() => {
-                                setType(type === CameraType.back ? CameraType.front : CameraType.back);
-                            }} />
-                    </View>
-                </View>
-            </Camera>
+            {mode === 'video' ?
+                isFocused && <Camera style={styles.camera} type={type} ref={ref => setCamera(ref!!)}>
+                    {insideElements}
+                </Camera> :
+                <ImageBackground
+                    style={{ flex: 1 }}
+                    source={require('../assets/images/roland-kay-smith-GBKpO-rJecg-unsplash.jpg')}>
+                    {insideElements}
+                </ImageBackground >
             }
         </>
-    );
+    )
 }
 
 const styles = StyleSheet.create({
@@ -92,19 +148,21 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     buttonContainer: {
-        // backgroundColor: 'transparent',
+        backgroundColor: 'transparent',
         margin: 20,
     },
     closeButton: {
         marginBottom: 'auto',
         marginRight: 'auto',
     },
-    invisibleButton: {
-        opacity: 0,
+    leftButton: {
         marginLeft: 12,
         marginBottom: 12,
     },
-    flipButton: {
+    invisibleButton: {
+        opacity: 0,
+    },
+    rightButton: {
         marginRight: 12,
         marginBottom: 16,
     },
@@ -129,40 +187,48 @@ const styles = StyleSheet.create({
 })
 
 type ModePickerProps = {
-    state: { open: boolean }
-    setState: (state: { open: boolean }) => void
+    mode: Mode,
+    setMode: (mode: Mode) => void,
+    open: boolean,
+    setOpen: (open: boolean) => void,
 }
 
-const audioMode = {
-    icon: 'microphone',
-    key: 'audio',
-}
-const videoMode = {
-    icon: 'video',
-    key: 'video',
-}
+const modes: { icon: string, key: Mode }[] = [
+    {
+        icon: 'microphone',
+        key: 'audio',
+    },
+    {
+        icon: 'video',
+        key: 'video',
+    }
+]
 
-const ModePicker = ({ state, setState }: ModePickerProps) => {
-    const onStateChange = ({ open }: { open: boolean }) => setState({ open });
-    const [mode, setMode] = useState(videoMode)
-    const { open } = state;
+const modeIcon = (mode: Mode) => ({
+    audio: 'microphone',
+    video: 'video',
+}[mode])
+
+const ModePicker = ({ mode, setMode, open, setOpen }: ModePickerProps) => {
 
     return (
         // <View style={{ flex: 1, position: 'absolute', bottom: 0 }}>
+        // <Provider>
         <Portal>
             <FAB.Group
                 fabStyle={fabStyles.fabStyle}
                 style={fabStyles.groupStyle}
                 // style={{ position: 'absolute' }}
                 open={open}
-                icon={open ? 'plus' : mode.icon}
-                actions={[audioMode, videoMode].map((mode) => ({
+                icon={open ? 'plus' : modeIcon(mode)}
+                actions={modes.map((mode) => ({
                     icon: mode.icon,
-                    onPress: () => setMode(mode)
+                    onPress: () => setMode(mode.key)
                 }))}
-                onStateChange={onStateChange}
+                onStateChange={({ open: newOpen }) => setOpen(newOpen)}
             />
         </Portal>
+        // </Provider>
     );
 };
 

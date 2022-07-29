@@ -34,9 +34,4 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     paddingLeft: 10,
   },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
-  },
 });

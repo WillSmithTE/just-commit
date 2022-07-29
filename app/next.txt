@@ -1,4 +1,6 @@
 - fix camera distortion (https://stackoverflow.com/questions/58634905/camera-preview-in-expo-is-distorted)
+   - https://github.com/react-native-camera/react-native-camera/issues/1280
+   - https://github.com/react-native-camera/react-native-camera/issues/1267
 DONE- move record stuff to tab on bottom
 DONE - refactor to redux-persist, remove manual saves
 DONE- use https://callstack.github.io/react-native-paper/getting-started.html for modal and buttons
@@ -20,12 +22,12 @@ DONE- maybe need an error handler toast
 TESTING- no notification icon
 - colour of the recording button, should be white but is gray
 - don't start with "it's early days"
-- voice recorder instead of video? switch mode somehow. bottom left video signal? click to show 3 options?
+DONE- voice recorder instead of video? switch mode somehow. bottom left video signal? click to show 3 options?
    - https://callstack.github.io/react-native-paper/fab-group.html
    - choose your own background for voice recordings?
 - type a commitment instead of recording one?
 - reward system to check off if you  did it (duolingo  style? animation, sound?)
-   - swipe to say i did it on home screen, then it  disappears?
+- swipe to say i did it on home screen, then it  disappears?
 - recurring one (every day? google calendar style)
 - to share: sends video, sends title and notification time in message. share with  a friend  on messenger
    - https://docs.expo.dev/tutorial/sharing/
@@ -47,3 +49,6 @@ DONE- it's a NAME not a title
 - save modal lag before closing
 - save modal looks ugly
 - why just loading on playback after tap? need to do the error handling
+DONE- close on new recording is invisible against koala
+- groups section
+- no home. on lib can filter

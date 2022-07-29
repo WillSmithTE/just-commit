@@ -6,31 +6,34 @@ import * as MediaLibrary from 'expo-media-library';
 import { Loading } from './Loading';
 import * as Notifications from 'expo-notifications';
 import { registerForNotificationsAsync } from './Notification';
-import { AtLeast, isMyVideo, MyVideo } from '../types';
+import { AtLeast, AtLeast2, isMyVideo, MyMedia } from '../types';
 import { useDispatch } from 'react-redux';
 import { upsertMedia } from '../services/mediaSlice';
-import { Button, IconButton, Modal, TextInput, } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native';
+import { Button, IconButton, Modal, Portal, RadioButton, TextInput, } from 'react-native-paper';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
 import Icon from './Icon';
 import { isDevice } from 'expo-device';
 
 type SaveEditModalProps = {
     isVisible: boolean,
     setVisible: (val: boolean) => void,
-    video: AtLeast<MyVideo, 'uri'>
+    media: AtLeast2<MyMedia, 'uri', 'type'>,
 }
 
 const isDebug = false
 
-export const SaveEditModal = ({ isVisible, setVisible, video }: SaveEditModalProps) => {
-    const [title, setTitle] = useState(video.title || '')
-    const [date, setDate] = useState<Date | undefined>(video.deadline ? new Date(video.deadline.date) : undefined)
+export const SaveEditModal = ({ isVisible, setVisible, media }: SaveEditModalProps) => {
+    const [title, setTitle] = useState(media.title || '')
+    const [date, setDate] = useState<Date | undefined>(media.deadline ? new Date(media.deadline.date) : undefined)
     const [dateOpen, setDateOpen] = useState(false)
     const [permissionsStatus, requestPermission] = MediaLibrary.usePermissions();
     const [isLoading, setLoading] = useState(false)
     const dispatch = useDispatch()
     const navigation = useNavigation();
-    const isNewMode = () => isMyVideo(video)
+    const isNewMode = () => isMyVideo(media)
+    const [repeat, setRepeat] = useState<string>((media.repeat ?? repeatOptions[0]).label)
+    const [repeatOpen, setRepeatOpen] = useState(false)
+    const isFocused = useIsFocused();
 
     const onPressSave = async () => {
         setLoading(true)
@@ -48,24 +51,25 @@ export const SaveEditModal = ({ isVisible, setVisible, video }: SaveEditModalPro
             dateToSave = now
         }
 
-        let mediaToSave: MyVideo
-        if (isMyVideo(video)) mediaToSave = video // if in edit mode
+        let mediaLibAsset: MediaLibrary.Asset
+        if (isMyVideo(media)) mediaLibAsset = media // if in edit mode
         else {
-            mediaToSave = await MediaLibrary.createAssetAsync(video.uri)
-            video.deadline && await deleteOldNotification(video.deadline.id)
-            if (Platform.OS === 'ios' && isDevice) mediaToSave.uri = convertLocalIdentifierToAssetLibrary(mediaToSave.uri, 'mov')
+            mediaLibAsset = await MediaLibrary.createAssetAsync(media.uri)
+            media.deadline && await deleteOldNotification(media.deadline.id)
+            if (Platform.OS === 'ios' && isDevice) mediaLibAsset.uri = convertLocalIdentifierToAssetLibrary(mediaLibAsset.uri, 'mov')
         }
         const deadline = date ?
             {
-                id: await registerForNotification(mediaToSave.id, date.getTime(), title),
+                id: await registerForNotification(mediaLibAsset.id, date.getTime(), title),
                 date: date.getTime()
             } : undefined
-        mediaToSave = {
-            ...mediaToSave,
+        const mediaToSave = {
+            ...mediaLibAsset,
             deadline,
             title,
+            type: media.type,
         }
-        dispatch(upsertMedia({ ...mediaToSave }))
+        dispatch(upsertMedia(mediaToSave))
         setVisible(false)
         setLoading(false)
 
@@ -80,7 +84,6 @@ export const SaveEditModal = ({ isVisible, setVisible, video }: SaveEditModalPro
         }}
         style={styles.modal}
         contentContainerStyle={styles.modalView}>
-
         {isLoading && <Loading />}
         <TextInput underlineColor='purple' mode='flat' label={'Name (optional)'}
             style={styles.titleTextInput} value={title} onChangeText={setTitle} autoComplete='off'
@@ -90,12 +93,17 @@ export const SaveEditModal = ({ isVisible, setVisible, video }: SaveEditModalPro
                     background: '#003489'
                 }
             }} />
-        <View style={styles.notificationRow}>
+        <View style={styles.row}>
             <Button mode='outlined' icon='bell-outline' style={styles.notificationButton} onPress={() => {
                 if (date === undefined) setDate(new Date())
                 setDateOpen(true)
             }}>{date ? date.toLocaleString() : 'Add deadline'}</Button>
             {date && <IconButton icon="close" size={35} onPress={() => setDate(undefined)} />}
+        </View>
+        <View style={styles.row}>
+            <Button mode='outlined' icon='arrow-u-right-top' style={styles.notificationButton} onPress={() => setRepeatOpen(true)}>
+                {repeat ?? 'Does not repeat'}
+            </Button>
         </View>
         {date && <DatePicker
             modal
@@ -107,12 +115,34 @@ export const SaveEditModal = ({ isVisible, setVisible, video }: SaveEditModalPro
             }}
             onCancel={() => setDateOpen(false)}
         />}
+        {isFocused && <RepeatPicker {...{ repeat, setRepeat, repeatOpen, setRepeatOpen }} />}
         <View style={styles.buttonContainer}>
             <Button style={styles.button} color={'blue'} mode='contained' onPress={onPressSave}>Save</Button>
             <Button style={styles.button} color={'gray'} mode='outlined' onPress={() => setVisible(false)}>Cancel</Button>
         </View>
     </Modal>
 
+}
+
+type RepeatPickerProps = {
+    repeat: string,
+    setRepeat: (repeat: string) => void,
+    repeatOpen: boolean,
+    setRepeatOpen: (open: boolean) => void,
+}
+const RepeatPicker = ({ repeat, setRepeat, repeatOpen, setRepeatOpen }: RepeatPickerProps) => {
+    return <Portal>
+        <Modal visible={repeatOpen} onDismiss={() => setRepeatOpen(false)} contentContainerStyle={styles.repeatModalContainer}>
+            {repeatOptions.map(({ label }, i) =>
+                <Button onPress={() => { setRepeat(label); setRepeatOpen(false) }} key={i}>
+                    <View style={styles.repeatOption} >
+                        <RadioButton.Android value={label} status={repeat === label ? 'checked' : 'unchecked'} />
+                        <Text>{label}</Text>
+                    </View>
+                </Button>
+            )}
+        </Modal>
+    </Portal>
 }
 
 const deleteOldNotification = async (notificationId: string) => {
@@ -141,6 +171,21 @@ export const convertLocalIdentifierToAssetLibrary = (uri: string, ext: string) =
     const hash = withoutPh.split('/')[0];
     return `assets-library://asset/asset.${ext}?id=${hash}&ext=${ext}`;
 };
+
+const repeatOptions = [
+    {
+        label: 'Does not repeat',
+    },
+    {
+        label: 'Every day',
+    },
+    {
+        label: 'Every week',
+    },
+    {
+        label: 'Every month',
+    },
+]
 
 const styles = StyleSheet.create({
     modal: {
@@ -192,7 +237,7 @@ const styles = StyleSheet.create({
         alignSelf: 'stretch',
         backgroundColor: '#f9f9f9',
     },
-    notificationRow: {
+    row: {
         flexDirection: 'row',
         alignItems: 'center',
         paddingBottom: 15,
@@ -204,5 +249,17 @@ const styles = StyleSheet.create({
     },
     notificationButton: {
         flex: 1,
+    },
+    repeatModalContainer: {
+        backgroundColor: 'white',
+        padding: 20,
+        borderRadius: 25,
+        justifyContent: 'flex-start',
+        alignItems: 'flex-start',
+    },
+    repeatOption: {
+        flexDirection: 'row',
+        padding: 5,
+        alignItems: 'center',
     }
 })  

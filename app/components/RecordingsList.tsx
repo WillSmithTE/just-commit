@@ -4,12 +4,14 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { RecordingSummary } from './RecordingSummary';
 import { useSelector } from 'react-redux';
 import { RootState } from '../services/reduxStore';
+import { MyMedia } from '../types';
 
 type RecordingsListProps = {
     timeUntil?: Date,
+    shouldDisplayItem?: (media: MyMedia) => boolean,
 }
 
-export const RecordingsList = ({ timeUntil }: RecordingsListProps) => {
+export const RecordingsList = ({ shouldDisplayItem }: RecordingsListProps) => {
 
     const medias = useSelector((state: RootState) => state.media.medias)
     return (
@@ -21,14 +23,15 @@ export const RecordingsList = ({ timeUntil }: RecordingsListProps) => {
             showsVerticalScrollIndicator
         >
             {medias === undefined || medias.length === 0 ?
-                    <Text style={{color: 'white'}}>Make your first video to see it here.</Text>
+                <Text style={{ color: 'white' }}>Record something to see it here.</Text>
                 :
-                medias.map((media) => (
-                    <RecordingSummary
-                        key={media.id}
-                        media={media}
-                    />
-                ))
+                (shouldDisplayItem ? medias.filter(shouldDisplayItem) : medias)
+                    .map((media) => (
+                        <RecordingSummary
+                            key={`${media.type}-${media.id}`}
+                            media={media}
+                        />
+                    ))
             }
         </ScrollView>
     );
