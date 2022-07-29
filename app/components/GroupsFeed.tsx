@@ -55,7 +55,7 @@ export const GroupsFeed = ({ shouldDisplayItem }: GroupsFeedProps) => {
     return (<View style={{ alignItems: 'flex-start', justifyContent: 'flex-start', flex: 1, }}>
         <ScrollView showsHorizontalScrollIndicator horizontal style={{ flexGrow: 0, paddingTop: 20, }}>
             <View style={{ flexDirection: 'row', alignItems: 'flex-start', }}>
-                {groups.map((group) => <View style={{ margin: 10, }}>
+                {groups.map((group, i) => <View style={{ margin: 10, }} key={i}>
                     <Image source={group.imageUri} style={{ height: 80, width: 80, }} />
                     <Text style={{ color: 'white', position: 'absolute', bottom: 0 }}>{group.name}</Text>
                 </View>)}

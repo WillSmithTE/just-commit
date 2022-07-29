@@ -11,18 +11,23 @@ import { showComingSoon } from '../components/Error';
 import { Recorder } from '../components/Recorder';
 import { RecordingsList } from '../components/RecordingsList';
 import { Text, View } from '../components/Themed';
+import { Feature } from '../hooks/useFeature';
 import { RootState } from '../services/reduxStore';
 import { setFeature } from '../services/settingsSlice';
-import { Feature, RootTabScreenProps } from '../types'
+import { RootTabScreenProps } from '../types'
 
 const features = [
   {
-    label: 'Version 2: Save & Edit',
-    key: Feature.VERSION_2_SAVE_EDIT,
+    label: 'Full screen record',
+    key: Feature.FULL_RECORD_SCREEN,
   },
   {
-    label: 'Version 2: Record Button',
-    key: Feature.VERSION_2_RECORD_BUTTON,
+    label: 'Record mode switch in middle',
+    key: Feature.RECORD_FAB_IN_MIDDLE,
+  },
+  {
+    label: 'Full screen save & edit',
+    key: Feature.FULL_SCREEN_SAVE_EDIT,
   },
 ]
 

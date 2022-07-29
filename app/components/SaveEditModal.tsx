@@ -14,6 +14,7 @@ import { useIsFocused, useNavigation } from '@react-navigation/native';
 import Icon from './Icon';
 import { isDevice } from 'expo-device';
 import { showMessage } from 'react-native-flash-message';
+import { Feature, useFeature } from '../hooks/useFeature';
 
 type SaveEditModalProps = {
     isVisible: boolean,
@@ -35,6 +36,7 @@ export const SaveEditModal = ({ isVisible, setVisible, media }: SaveEditModalPro
     const [repeat, setRepeat] = useState<string>(media.repeat?.label ?? repeatOptions[0].label)
     const [repeatOpen, setRepeatOpen] = useState(false)
     const isFocused = useIsFocused();
+    const isRecordV2 = useFeature(Feature.FULL_RECORD_SCREEN)
 
     const onPressSave = async () => {
         setLoading(true)
@@ -53,12 +55,10 @@ export const SaveEditModal = ({ isVisible, setVisible, media }: SaveEditModalPro
         }
 
         let mediaLibAsset: MediaLibrary.Asset
-        console.debug({isMyvid: isMyVideo(media), media: JSON.stringify(media, null, 2)})
         if (isMyVideo(media)) mediaLibAsset = media // if in edit mode
         else {
-            console.debug(2)
             mediaLibAsset = await MediaLibrary.createAssetAsync(media.uri)
-            console.log(JSON.stringify({newLibAsset: mediaLibAsset}, null, 2))
+            console.log(JSON.stringify({ newLibAsset: mediaLibAsset }, null, 2))
             media.deadline && await deleteOldNotification(media.deadline.id)
             if (Platform.OS === 'ios' && isDevice) mediaLibAsset.uri = convertLocalIdentifierToAssetLibrary(mediaLibAsset.uri, 'mov')
         }
@@ -77,7 +77,7 @@ export const SaveEditModal = ({ isVisible, setVisible, media }: SaveEditModalPro
         setVisible(false)
         setLoading(false)
 
-        navigation.goBack()
+        isRecordV2 ? navigation.navigate('Root') : navigation.goBack()
     }
 
     return <Modal

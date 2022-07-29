@@ -80,8 +80,3 @@ function isMediaLibAsset(asset: { [prop: string]: any }): asset is MediaLibrary.
 export type AtLeast<T, K extends keyof T> = Partial<T> & Pick<T, K>
 export type AtLeast2<T, K extends keyof T, J extends keyof T> = Partial<T> & Pick<T, K> & Pick<T, J>
 
-export enum Feature {
-  VERSION_2_SAVE_EDIT = 'v2-save-edit',
-  NOTHING = 'nothing',
-  VERSION_2_RECORD_BUTTON = 'v2-record-button'
-}

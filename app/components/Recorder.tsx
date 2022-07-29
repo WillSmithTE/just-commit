@@ -12,8 +12,7 @@ import { Audio } from 'expo-av';
 import { showError2 } from './Error';
 import { useSelector } from 'react-redux';
 import { RootState } from '../services/reduxStore';
-import { useFeature } from '../hooks/useFeature';
-import { Feature } from '../types';
+import { Feature, useFeature } from '../hooks/useFeature';
 
 type Mode = 'video' | 'audio'
 type ModePickerState = {
@@ -30,8 +29,7 @@ export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListB
     const [audioRecording, setAudioRecording] = React.useState<Audio.Recording | undefined>();
     const [mode, setMode] = React.useState<Mode>('video');
     const [modePickerOpen, setModePickerOpen] = React.useState(false)
-    const isV2Record = useFeature(Feature.VERSION_2_RECORD_BUTTON)
-
+    const isFullRecordScreen = useFeature(Feature.FULL_RECORD_SCREEN)
     useEffect(() => {
         if (mode === 'video')
             (async () => {
@@ -113,7 +111,7 @@ export const Recorder = ({ navigation }: { navigation: NavigationProp<ParamListB
         <View>
             {isFocused && <ModePicker open={modePickerOpen} setOpen={setModePickerOpen} mode={mode} setMode={setMode} />}
         </View>
-        {isV2Record && <IconButton
+        {isFullRecordScreen && <IconButton
             onPress={() => navigation.goBack()}
             icon='close'
             color='white'
@@ -231,40 +229,43 @@ const modeIcon = (mode: Mode) => ({
 
 const ModePicker = ({ mode, setMode, open, setOpen }: ModePickerProps) => {
     const isFocused = useIsFocused();
+    const isFabInMiddle = useFeature(Feature.RECORD_FAB_IN_MIDDLE)
 
-    const v2Record = useFeature(Feature.VERSION_2_RECORD_BUTTON)
+    const fullRecordScreen = useFeature(Feature.FULL_RECORD_SCREEN)
     return (
-        <Portal>
-            <FAB.Group
-                visible={isFocused}
-                fabStyle={fabStyles(v2Record).fabStyle}
-                style={fabStyles(v2Record).groupStyle}
-                open={open}
-                icon={open ? 'plus' : modeIcon(mode)}
-                actions={modes.map((mode) => ({
-                    icon: mode.icon,
-                    onPress: () => setMode(mode.key)
-                }))}
-                onStateChange={({ open: newOpen }) => setOpen(newOpen)}
-            />
-        </Portal>
+        <View style={{ flex: 1, alignItems: 'center' }}>
+            <Portal>
+                <FAB.Group
+                    visible={isFocused}
+                    fabStyle={fabStyles(fullRecordScreen, isFabInMiddle).fabStyle}
+                    style={fabStyles(fullRecordScreen, isFabInMiddle).groupStyle}
+                    open={open}
+                    icon={open ? 'plus' : modeIcon(mode)}
+                    actions={modes.map((mode) => ({
+                        icon: mode.icon,
+                        onPress: () => setMode(mode.key)
+                    }))}
+                    onStateChange={({ open: newOpen }) => setOpen(newOpen)}
+                />
+            </Portal>
+        </View>
     );
 };
 
-const fabStyles = (v2Record: boolean) => StyleSheet.create({
+const fabStyles = (fullRecordScreen: boolean, isFabInMiddle: boolean) => StyleSheet.create({
     fabStyle: {
-        marginBottom: v2Record ? 30 : 80,
+        marginBottom: fullRecordScreen ? 30 : 80,
         marginLeft: 30,
-        left: 0,
-        bottom: 0,
         backgroundColor: '#fc034e',
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
     },
     groupStyle: {
-        left: 0,
-        bottom: 0,
+        backgroundColor: 'transparent',
+        alignSelf: 'center',
         justifyContent: 'flex-end',
-        alignItems: 'flex-start'
+        ...(() => isFabInMiddle ?
+            { alignItems: 'center', } :
+            { alignItems: 'flex-start' })()
     }
 })

@@ -110,13 +110,7 @@ export const Playback = ({ route: { params: { media, inEditMode } } }: VideoPlay
             onPlaybackStatusUpdate={newStatus => setStatus(() => newStatus)}
             onError={(error) => showError2({ message: `oops! something went wrong playing your video`, description: error })}
         />}
-        {media.type === 'audio' && <ImageBackground
-            // style={{ flex: 1 }}
-            style={styles.video}
-            source={require('../assets/images/snow.png')}>
-            {/* {insideElements} */}
-        </ImageBackground >
-        }
+        {media.type === 'audio' && <ImageBackground style={styles.video} source={require('../assets/images/snow.png')} />}
         <View style={styles.buttonContainer}>
             <IconButton
                 onPress={pressExit}
