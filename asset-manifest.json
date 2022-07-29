@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/just-commit/static/css/main.073c9b0a.css",
-    "main.js": "/just-commit/static/js/main.895595b8.js",
+    "main.js": "/just-commit/static/js/main.166f6931.js",
     "static/js/787.c065c3e8.chunk.js": "/just-commit/static/js/787.c065c3e8.chunk.js",
     "index.html": "/just-commit/index.html",
     "main.073c9b0a.css.map": "/just-commit/static/css/main.073c9b0a.css.map",
-    "main.895595b8.js.map": "/just-commit/static/js/main.895595b8.js.map",
+    "main.166f6931.js.map": "/just-commit/static/js/main.166f6931.js.map",
     "787.c065c3e8.chunk.js.map": "/just-commit/static/js/787.c065c3e8.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.073c9b0a.css",
-    "static/js/main.895595b8.js"
+    "static/js/main.166f6931.js"
   ]
 }
